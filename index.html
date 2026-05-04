@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fresnel Kalkulator — P2P Radio Link</title>
+<style>
+:root {
+  --bg:#0f1117;--bg2:#1a1d27;--bg3:#222636;--bg4:#2a2f45;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.18);
+  --text:#e8e6f0;--text2:#8b89a0;--text3:#4a4860;
+  --blue:#4a9eff;--blue-dim:rgba(74,158,255,0.12);
+  --green:#3ecf8e;--green-dim:rgba(62,207,142,0.12);
+  --amber:#f5a623;--amber-dim:rgba(245,166,35,0.12);
+  --red:#ff5c5c;--red-dim:rgba(255,92,92,0.12);
+  --teal:#1D9E75;
+  --r:10px;--rs:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;min-height:100vh;}
+header{background:var(--bg2);border-bottom:1px solid var(--border);padding:13px 26px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:20;}
+.logo{width:33px;height:33px;background:linear-gradient(135deg,var(--blue),var(--teal));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;}
+header h1{font-size:15px;font-weight:600;}
+header p{font-size:11px;color:var(--text2);margin-top:1px;}
+.badge{margin-left:auto;background:var(--blue-dim);color:var(--blue);border:1px solid rgba(74,158,255,0.2);border-radius:20px;padding:3px 11px;font-size:11px;font-weight:500;}
+main{max-width:980px;margin:0 auto;padding:22px 18px;display:grid;grid-template-columns:358px 1fr;gap:16px;align-items:start;}
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:13px;}
+.panel:last-child{margin-bottom:0;}
+.ph{padding:9px 13px;border-bottom:1px solid var(--border);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);display:flex;align-items:center;gap:7px;}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.dot-blue{background:var(--blue);}.dot-green{background:var(--green);}.dot-amber{background:var(--amber);}.dot-red{background:var(--red);}
+.pb{padding:11px 13px;}
+.field{margin-bottom:11px;}.field:last-child{margin-bottom:0;}
+.fl{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.fl span:first-child{font-size:12px;color:var(--text2);}.fval{font-size:13px;font-weight:600;color:var(--text);}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;background:var(--bg3);border-radius:2px;outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--blue);cursor:pointer;border:2px solid var(--bg2);transition:transform .15s;}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
+input[type=text]{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);font-size:12px;font-family:monospace;padding:6px 9px;outline:none;width:100%;transition:border-color .2s;}
+input[type=text]:focus{border-color:var(--blue);}
+input[type=text]::placeholder{color:var(--text3);font-size:11px;}
+.coord-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:9px 11px;margin-bottom:9px;}
+.coord-lbl{font-size:11px;color:var(--text2);margin-bottom:5px;}
+.coord-row{display:flex;gap:6px;align-items:center;}
+.cbtn{background:var(--blue-dim);border:1px solid rgba(74,158,255,0.25);color:var(--blue);border-radius:var(--rs);padding:5px 9px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .2s;}
+.cbtn:hover{background:rgba(74,158,255,0.22);}
+.cst{font-size:11px;min-height:15px;margin-top:4px;}
+.cok{color:var(--green);}.cerr{color:var(--red);}.cload{color:var(--amber);}
+.obs-list{display:flex;flex-direction:column;gap:7px;}
+.obs-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:9px 11px;}
+.obs-hdr{display:flex;align-items:center;gap:7px;margin-bottom:7px;}
+.obs-num{width:19px;height:19px;border-radius:50%;background:var(--amber-dim);color:var(--amber);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.obs-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;padding:0 2px;line-height:1;transition:color .2s;margin-left:auto;}
+.obs-del:hover{color:var(--red);}
+.obs-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.obs-grid .field{margin-bottom:0;}
+.add-btn{width:100%;background:transparent;border:1px dashed var(--border2);border-radius:var(--rs);color:var(--text2);font-size:12px;padding:7px;cursor:pointer;transition:all .2s;margin-top:7px;}
+.add-btn:hover{border-color:var(--amber);color:var(--amber);}
+.results{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:13px;}
+.rc{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:9px 11px;}
+.rlbl{font-size:11px;color:var(--text2);margin-bottom:3px;}.rval{font-size:19px;font-weight:600;color:var(--text);}
+.rval.blue{color:var(--blue);}.rval.green{color:var(--green);}.rval.amber{color:var(--amber);}.rval.red{color:var(--red);}
+.sb{border-radius:var(--rs);padding:9px 13px;font-size:13px;font-weight:500;margin-bottom:13px;}
+.sb-ok{background:var(--green-dim);color:var(--green);border:1px solid rgba(62,207,142,0.2);}
+.sb-warn{background:var(--amber-dim);color:var(--amber);border:1px solid rgba(245,166,35,0.2);}
+.sb-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,92,92,0.2);}
+.otable{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:13px;}
+.otable th{text-align:left;padding:5px 9px;border-bottom:1px solid var(--border);color:var(--text2);font-weight:500;font-size:11px;}
+.otable td{padding:5px 9px;border-bottom:1px solid var(--border);}
+.otable tr:last-child td{border-bottom:none;}
+.pill{display:inline-block;border-radius:20px;padding:2px 7px;font-size:11px;font-weight:500;}
+.pok{background:var(--green-dim);color:var(--green);}.pwarn{background:var(--amber-dim);color:var(--amber);}.pblock{background:var(--red-dim);color:var(--red);}
+canvas{display:block;width:100%;height:225px;}
+.cw{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;}
+.lnr{margin-bottom:13px;}
+.lnr input{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);font-size:14px;font-weight:500;padding:8px 12px;width:100%;outline:none;}
+.lnr input:focus{border-color:var(--blue);}
+footer{text-align:center;padding:18px;color:var(--text3);font-size:11px;border-top:1px solid var(--border);margin-top:8px;}
+@media(max-width:740px){main{grid-template-columns:1fr;padding:12px;}.badge{display:none;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">F</div>
+  <div><h1>Fresnel Kalkulator</h1><p>P2P Radio Link — Optička vidljivost i Fresnelova zona</p></div>
+  <div class="badge">v2.0 — XPT</div>
+</header>
+<main>
+<!-- LEFT -->
+<div>
+  <div class="lnr"><input type="text" id="linkName" placeholder="Naziv linka..." value="Main1 → Station1" style="font-family:inherit;"></div>
+
+  <div class="panel">
+    <div class="ph"><div class="dot dot-blue"></div>Lokacija A</div>
+    <div class="pb">
+      <div class="coord-box">
+        <div class="coord-lbl">Koordinate (paste sa Google Maps / Earth)</div>
+        <div class="coord-row">
+          <input type="text" id="coordA" placeholder='44°45&apos;03.50"N 17°50&apos;18.56"E  ili  44.7509, 17.8384'>
+          <button class="cbtn" onclick="fetchElev('A')">Dohvati</button>
+        </div>
+        <div class="cst" id="stA"></div>
+      </div>
+      <div class="field">
+        <div class="fl"><span>Nadmorska visina (m)</span><span class="fval" id="asl1V">184 m</span></div>
+        <input type="range" id="asl1" min="0" max="2000" step="1" value="184" oninput="update()">
+      </div>
+      <div class="field">
+        <div class="fl"><span>Visina antene iznad tla (m)</span><span class="fval" id="h1V">30.5 m</span></div>
+        <input type="range" id="h1" min="1" max="100" step="0.5" value="30.5" oninput="update()">
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="ph"><div class="dot dot-green"></div>Lokacija B</div>
+    <div class="pb">
+      <div class="coord-box">
+        <div class="coord-lbl">Koordinate (paste sa Google Maps / Earth)</div>
+        <div class="coord-row">
+          <input type="text" id="coordB" placeholder='44°44&apos;00.00"N 17°50&apos;00.00"E  ili  44.7400, 17.8333'>
+          <button class="cbtn" onclick="fetchElev('B')">Dohvati</button>
+        </div>
+        <div class="cst" id="stB"></div>
+      </div>
+      <div class="field">
+        <div class="fl"><span>Nadmorska visina (m)</span><span class="fval" id="asl2V">253 m</span></div>
+        <input type="range" id="asl2" min="0" max="2000" step="1" value="253" oninput="update()">
+      </div>
+      <div class="field">
+        <div class="fl"><span>Visina antene iznad tla (m)</span><span class="fval" id="h2V">15.5 m</span></div>
+        <input type="range" id="h2" min="1" max="100" step="0.5" value="15.5" oninput="update()">
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="ph"><div class="dot dot-blue"></div>Parametri linka</div>
+    <div class="pb">
+      <div class="field">
+        <div class="fl"><span>Udaljenost (km)</span><span class="fval" id="distV">1.024 km</span></div>
+        <input type="range" id="dist" min="0.1" max="50" step="0.05" value="1.024" oninput="update()">
+      </div>
+      <div class="field">
+        <div class="fl"><span>Frekvencija (GHz)</span><span class="fval" id="freqV">5.8 GHz</span></div>
+        <input type="range" id="freq" min="1" max="60" step="0.1" value="5.8" oninput="update()">
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="ph"><div class="dot dot-amber"></div>Prepreke <span style="margin-left:auto;font-size:10px;color:var(--text3)" id="obsCount">0 / 5</span></div>
+    <div class="pb">
+      <div class="obs-list" id="obsList"></div>
+      <button class="add-btn" onclick="addObs()">+ Dodaj prepreku</button>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT -->
+<div>
+  <div class="results">
+    <div class="rc"><div class="rlbl">Antena A — apsolutno</div><div class="rval blue" id="abs1">—</div></div>
+    <div class="rc"><div class="rlbl">Antena B — apsolutno</div><div class="rval blue" id="abs2">—</div></div>
+    <div class="rc"><div class="rlbl">F1 poluprecnik (sredina)</div><div class="rval" id="r1">—</div></div>
+    <div class="rc"><div class="rlbl">60% F1 — minimum</div><div class="rval" id="r60">—</div></div>
+    <div class="rc"><div class="rlbl">Tilt antene A→B</div><div class="rval" id="tilt">—</div></div>
+    <div class="rc"><div class="rlbl">Broj prepreka</div><div class="rval" id="obsTotal">0</div></div>
+  </div>
+  <div class="sb sb-ok" id="sbox"><span id="stxt">Izračunavanje...</span></div>
+  <div id="otWrap" style="display:none;margin-bottom:13px;">
+    <table class="otable">
+      <thead><tr><th>#</th><th>Naziv</th><th>Visina</th><th>Poz.</th><th>LOS na poz.</th><th>Clearance</th><th>Status</th></tr></thead>
+      <tbody id="otBody"></tbody>
+    </table>
+  </div>
+  <div class="cw"><canvas id="profile"></canvas></div>
+</div>
+</main>
+<footer>Fresnel Kalkulator v2.0 — XPT Radio Projekt &nbsp;|&nbsp; r₁ = 17.3 × √(d₁×d₂ / f×d) &nbsp;|&nbsp; Nadmorske visine: Open-Elevation API (SRTM)</footer>
+
+<script>
+let obstacles = [], oid = 0;
+
+// ── DMS / Decimal koordinate parser ─────────────────────────
+function parseDMS(s) {
+  s = s.trim().replace(/\s+/g,' ');
+  // Decimal degrees: 44.75098, 17.838481  or  44.75098 17.838481
+  const dec = s.match(/^(-?\d+\.?\d*)[,\s]+(-?\d+\.?\d*)$/);
+  if (dec) return {lat:+dec[1], lon:+dec[2]};
+  // DMS: 44°45'03.50"N 17°50'18.56"E — handles various quote chars
+  const dms = s.match(/(\d+)[°d\s](\d+)['\u2019\u2018\s](\d+\.?\d*)[""\u201C\u201D\s]?([NS])[,\s]+(\d+)[°d\s](\d+)['\u2019\u2018\s](\d+\.?\d*)[""\u201C\u201D\s]?([EW])/i);
+  if (dms) {
+    let lat = +dms[1] + +dms[2]/60 + +dms[3]/3600;
+    let lon = +dms[5] + +dms[6]/60 + +dms[7]/3600;
+    if (/S/i.test(dms[4])) lat = -lat;
+    if (/W/i.test(dms[8])) lon = -lon;
+    return {lat, lon};
+  }
+  return null;
+}
+
+async function getElev(lat, lon) {
+  const lat6 = lat.toFixed(6), lon6 = lon.toFixed(6);
+
+  // Open-Meteo Elevation API — radi, bez API ključa, CORS ok
+  try {
+    const r = await fetch(
+      `https://api.open-meteo.com/v1/elevation?latitude=${lat6}&longitude=${lon6}`
+    );
+    if (r.ok) {
+      const d = await r.json();
+      if (Array.isArray(d.elevation) && d.elevation[0] !== null)
+        return d.elevation[0];
+    }
+  } catch(e) {}
+
+  // Fallback: elevation iz forecast endpointa
+  try {
+    const r = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat6}&longitude=${lon6}&hourly=temperature_2m&forecast_days=1`
+    );
+    if (r.ok) {
+      const d = await r.json();
+      if (d.elevation != null) return d.elevation;
+    }
+  } catch(e) {}
+
+  throw new Error('API nedostupan — unesi visinu ručno slajderom');
+}
+
+async function fetchElev(side) {
+  const inp = document.getElementById('coord'+side);
+  const st  = document.getElementById('st'+side);
+  const aslId = side==='A'?'asl1':'asl2';
+  const valId = side==='A'?'asl1V':'asl2V';
+  const coords = parseDMS(inp.value);
+  if (!coords) { st.className='cst cerr'; st.textContent='Neispravne koordinate — primjer: 44°45\'03.50"N 17°50\'18.56"E'; return; }
+  st.className='cst cload'; st.textContent='Dohvatam visinu za ('+coords.lat.toFixed(5)+', '+coords.lon.toFixed(5)+')...';
+  try {
+    const e = await getElev(coords.lat, coords.lon);
+    document.getElementById(aslId).value = Math.round(e);
+    document.getElementById(valId).textContent = Math.round(e)+' m';
+    st.className='cst cok'; st.textContent='✓ Nadmorska visina: '+Math.round(e)+' m  ('+coords.lat.toFixed(5)+', '+coords.lon.toFixed(5)+')';
+    update();
+  } catch(err) { st.className='cst cerr'; st.textContent='Greška: '+err.message+' — pokušaj ručno unijeti visinu slajderom'; }
+}
+
+async function fetchElevObs(obsId, idx) {
+  const inp = document.getElementById('coordObs'+obsId);
+  const st  = document.getElementById('stObs'+obsId);
+  const coords = parseDMS(inp.value);
+  if (!coords) { st.className='cst cerr'; st.textContent='Neispravne koordinate'; return; }
+  st.className='cst cload'; st.textContent='Dohvatam...';
+  try {
+    const e = await getElev(coords.lat, coords.lon);
+    obstacles[idx].asl = Math.round(e);
+    const sl = document.getElementById('oasl'+obsId);
+    const vl = document.getElementById('oaslV'+obsId);
+    if (sl) { sl.value=Math.round(e); vl.textContent=Math.round(e)+' m'; }
+    st.className='cst cok'; st.textContent='✓ '+Math.round(e)+' m';
+    update();
+  } catch(err) { st.className='cst cerr'; st.textContent='Greška: '+err.message; }
+}
+
+// ── Obstacles ────────────────────────────────────────────────
+function addObs() {
+  if (obstacles.length >= 5) return;
+  const id = ++oid;
+  obstacles.push({id, name:'Prepreka '+id, asl:210, pos:50});
+  renderObs(); update();
+}
+function delObs(id) { obstacles=obstacles.filter(o=>o.id!==id); renderObs(); update(); }
+
+function renderObs() {
+  document.getElementById('obsCount').textContent = obstacles.length+' / 5';
+  const list = document.getElementById('obsList');
+  list.innerHTML = '';
+  obstacles.forEach((o,i) => {
+    const d = document.createElement('div');
+    d.className = 'obs-item';
+    d.innerHTML = `
+      <div class="obs-hdr">
+        <div class="obs-num">${i+1}</div>
+        <input type="text" value="${o.name}" style="background:transparent;border:none;color:var(--text);font-size:12px;font-weight:500;padding:0;width:100%;outline:none;font-family:inherit;" oninput="obstacles[${i}].name=this.value;update()">
+        <button class="obs-del" onclick="delObs(${o.id})">×</button>
+      </div>
+      <div class="coord-box" style="margin-bottom:7px;">
+        <div class="coord-lbl">Koordinate prepreke</div>
+        <div class="coord-row">
+          <input type="text" id="coordObs${o.id}" placeholder='44°44&apos;30"N 17°50&apos;10"E'>
+          <button class="cbtn" onclick="fetchElevObs(${o.id},${i})">Dohvati</button>
+        </div>
+        <div class="cst" id="stObs${o.id}"></div>
+      </div>
+      <div class="obs-grid">
+        <div class="field">
+          <div class="fl"><span style="font-size:11px">Nadm. visina (m)</span><span class="fval" style="font-size:12px" id="oaslV${o.id}">${o.asl} m</span></div>
+          <input type="range" id="oasl${o.id}" min="0" max="2000" step="1" value="${o.asl}" oninput="obstacles[${i}].asl=+this.value;document.getElementById('oaslV${o.id}').textContent=this.value+' m';update()">
+        </div>
+        <div class="field">
+          <div class="fl"><span style="font-size:11px">Pozicija (%)</span><span class="fval" style="font-size:12px" id="oposV${o.id}">${o.pos}%</span></div>
+          <input type="range" id="opos${o.id}" min="1" max="99" step="1" value="${o.pos}" oninput="obstacles[${i}].pos=+this.value;document.getElementById('oposV${o.id}').textContent=this.value+'%';update()">
+        </div>
+      </div>`;
+    list.appendChild(d);
+  });
+}
+
+// ── Calculation ──────────────────────────────────────────────
+function update() {
+  const asl1=+document.getElementById('asl1').value;
+  const h1ag=+document.getElementById('h1').value;
+  const asl2=+document.getElementById('asl2').value;
+  const h2ag=+document.getElementById('h2').value;
+  const dist=+document.getElementById('dist').value;
+  const freq=+document.getElementById('freq').value;
+
+  document.getElementById('asl1V').textContent=asl1+' m';
+  document.getElementById('h1V').textContent=h1ag.toFixed(1)+' m';
+  document.getElementById('asl2V').textContent=asl2+' m';
+  document.getElementById('h2V').textContent=h2ag.toFixed(1)+' m';
+  document.getElementById('distV').textContent=dist.toFixed(3)+' km';
+  document.getElementById('freqV').textContent=freq.toFixed(1)+' GHz';
+
+  const ant1=asl1+h1ag, ant2=asl2+h2ag;
+  const r1mid=17.3*Math.sqrt((dist/2*dist/2)/(freq*dist));
+  const tilt=(Math.atan2(ant2-ant1,dist*1000)*180/Math.PI).toFixed(2);
+
+  document.getElementById('abs1').textContent=ant1.toFixed(1)+' m';
+  document.getElementById('abs2').textContent=ant2.toFixed(1)+' m';
+  document.getElementById('r1').textContent=r1mid.toFixed(1)+' m';
+  document.getElementById('r60').textContent=(r1mid*0.6).toFixed(1)+' m';
+  document.getElementById('tilt').textContent=(tilt>=0?'+':'')+tilt+'°';
+  document.getElementById('obsTotal').textContent=obstacles.length;
+
+  let worst='ok';
+  const res=obstacles.map(o=>{
+    const p=o.pos/100, d1=dist*p, d2=dist*(1-p);
+    const r=17.3*Math.sqrt((d1*d2)/(freq*dist));
+    const los=ant1+(ant2-ant1)*p;
+    const clr=los-r-o.asl;
+    let s='ok';
+    if(clr<0) s='block';
+    else if(clr<r*0.4) s='warn';
+    if(s==='block') worst='block';
+    else if(s==='warn'&&worst!=='block') worst='warn';
+    return{...o,los:los.toFixed(1),clr:clr.toFixed(1),r,s};
+  });
+
+  const sb=document.getElementById('sbox');
+  const st=document.getElementById('stxt');
+  sb.className='sb';
+  if(obstacles.length===0){sb.classList.add('sb-ok');st.textContent='Nema prepreka — Fresnelova zona slobodna. Tilt: '+(tilt>=0?'+':'')+tilt+'°';}
+  else if(worst==='block'){sb.classList.add('sb-danger');st.textContent='BLOKIRAN — jedna ili više prepreka siječe LOS liniju!';}
+  else if(worst==='warn'){sb.classList.add('sb-warn');st.textContent='Pažnja — prepreka ulazi u Fresnelovu zonu (ispod 60% F1).';}
+  else{sb.classList.add('sb-ok');st.textContent='OK — sve prepreke slobodne. Tilt: '+(tilt>=0?'+':'')+tilt+'°';}
+
+  const ow=document.getElementById('otWrap');
+  ow.style.display=obstacles.length?'block':'none';
+  document.getElementById('otBody').innerHTML=res.map((o,i)=>`
+    <tr>
+      <td style="color:var(--text2)">${i+1}</td>
+      <td>${o.name}</td>
+      <td>${o.asl} m</td>
+      <td>${o.pos}%</td>
+      <td>${o.los} m</td>
+      <td style="color:${o.s==='block'?'var(--red)':o.s==='warn'?'var(--amber)':'var(--green)'}">${o.clr} m</td>
+      <td><span class="pill ${o.s==='block'?'pblock':o.s==='warn'?'pwarn':'pok'}">${o.s==='block'?'BLOKIRAN':o.s==='warn'?'Pažnja':'OK'}</span></td>
+    </tr>`).join('');
+
+  draw(asl1,h1ag,asl2,h2ag,dist,freq,ant1,ant2,res);
+}
+
+// ── Canvas ────────────────────────────────────────────────────
+function draw(asl1,h1ag,asl2,h2ag,dist,freq,ant1,ant2,res){
+  const cv=document.getElementById('profile');
+  const W=cv.offsetWidth||540, H=225;
+  cv.width=W*devicePixelRatio; cv.height=H*devicePixelRatio;
+  const ctx=cv.getContext('2d'); ctx.scale(devicePixelRatio,devicePixelRatio);
+  const pad={l:52,r:18,t:16,b:34}, gW=W-pad.l-pad.r, gH=H-pad.t-pad.b, N=300;
+  const frT=[],frB=[],gnd=[];
+  for(let i=0;i<=N;i++){
+    const t=i/N,x=t*dist,d1=x,d2=dist-x;
+    const r=(i===0||i===N)?0:17.3*Math.sqrt((d1*d2)/(freq*dist));
+    const los=ant1+(ant2-ant1)*t, g=asl1+(asl2-asl1)*t;
+    frT.push({x,y:los+r}); frB.push({x,y:los-r}); gnd.push({x,y:g});
+  }
+  const allY=[...frT.map(p=>p.y),...frB.map(p=>p.y),...gnd.map(p=>p.y)];
+  res.forEach(o=>allY.push(o.asl));
+  const minY=Math.min(...allY)-5, maxY=Math.max(...allY)+12;
+  const sx=x=>pad.l+(x/dist)*gW, sy=y=>pad.t+gH-((y-minY)/(maxY-minY))*gH;
+  ctx.clearRect(0,0,W,H);
+  // grid
+  ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=0.5;
+  [.25,.5,.75].forEach(t=>{const gy=sy(minY+t*(maxY-minY));ctx.beginPath();ctx.moveTo(pad.l,gy);ctx.lineTo(pad.l+gW,gy);ctx.stroke();});
+  // ground fill
+  ctx.beginPath(); gnd.forEach((p,i)=>i===0?ctx.moveTo(sx(p.x),sy(p.y)):ctx.lineTo(sx(p.x),sy(p.y)));
+  ctx.lineTo(sx(dist),sy(minY));ctx.lineTo(sx(0),sy(minY));ctx.closePath();
+  ctx.fillStyle='rgba(100,90,70,0.18)';ctx.fill();
+  ctx.beginPath(); gnd.forEach((p,i)=>i===0?ctx.moveTo(sx(p.x),sy(p.y)):ctx.lineTo(sx(p.x),sy(p.y)));
+  ctx.strokeStyle='rgba(150,135,100,0.4)';ctx.lineWidth=1.5;ctx.stroke();
+  // Fresnel
+  ctx.beginPath(); frT.forEach((p,i)=>i===0?ctx.moveTo(sx(p.x),sy(p.y)):ctx.lineTo(sx(p.x),sy(p.y)));
+  frB.slice().reverse().forEach(p=>ctx.lineTo(sx(p.x),sy(p.y))); ctx.closePath();
+  ctx.fillStyle='rgba(29,158,117,0.1)';ctx.fill();
+  [frT,frB].forEach(arr=>{
+    ctx.beginPath(); arr.forEach((p,i)=>i===0?ctx.moveTo(sx(p.x),sy(p.y)):ctx.lineTo(sx(p.x),sy(p.y)));
+    ctx.strokeStyle='rgba(29,158,117,0.38)';ctx.lineWidth=1;ctx.stroke();
+  });
+  // LOS
+  ctx.beginPath();ctx.moveTo(sx(0),sy(ant1));ctx.lineTo(sx(dist),sy(ant2));
+  ctx.strokeStyle='#4a9eff';ctx.lineWidth=2;ctx.stroke();
+  // Obstacles
+  res.forEach((o,i)=>{
+    const ox=dist*o.pos/100;
+    const col=o.s==='block'?'rgba(255,92,92,0.85)':o.s==='warn'?'rgba(245,166,35,0.75)':'rgba(245,166,35,0.35)';
+    ctx.fillStyle=col;
+    ctx.fillRect(sx(ox)-5,sy(o.asl),10,sy(minY)-sy(o.asl));
+    ctx.fillStyle='#e8e6f0';ctx.font='10px sans-serif';ctx.textAlign='center';
+    ctx.fillText(o.asl+'m',sx(ox),sy(o.asl)-5);
+    ctx.fillStyle=col;ctx.beginPath();ctx.arc(sx(ox),sy(o.asl)-17,7,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='bold 9px sans-serif';ctx.fillText(i+1,sx(ox),sy(o.asl)-13);
+  });
+  // Antene
+  ctx.fillStyle='#4a9eff';
+  [{x:0,y:ant1},{x:dist,y:ant2}].forEach(p=>{ctx.beginPath();ctx.arc(sx(p.x),sy(p.y),5,0,Math.PI*2);ctx.fill();});
+  ctx.font='11px sans-serif';ctx.fillStyle='#8b89a0';
+  ctx.textAlign='right'; ctx.fillText('A',sx(0)-8,sy(ant1)+4); ctx.fillText(ant1.toFixed(0)+'m',sx(0)-8,sy(ant1)+16);
+  ctx.textAlign='left';  ctx.fillText('B',sx(dist)+8,sy(ant2)+4); ctx.fillText(ant2.toFixed(0)+'m',sx(dist)+8,sy(ant2)+16);
+  ctx.textAlign='right';ctx.fillStyle='rgba(139,137,160,0.5)';
+  [0,.33,.66,1].forEach(t=>{const yv=minY+t*(maxY-minY);ctx.fillText(Math.round(yv)+'m',pad.l-5,sy(yv)+4);});
+  ctx.textAlign='center';[0,.5,1].forEach(t=>{ctx.fillText((dist*t).toFixed(2)+'km',sx(dist*t),pad.t+gH+18);});
+}
+
+['asl1','h1','asl2','h2','dist','freq'].forEach(id=>document.getElementById(id).addEventListener('input',update));
+update();
+window.addEventListener('resize',update);
+</script>
+</body>
+</html>
