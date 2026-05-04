@@ -36,6 +36,11 @@ main{max-width:980px;margin:0 auto;padding:22px 18px;display:grid;grid-template-
 input[type=range]{-webkit-appearance:none;width:100%;height:4px;background:var(--bg3);border-radius:2px;outline:none;cursor:pointer;}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--blue);cursor:pointer;border:2px solid var(--bg2);transition:transform .15s;}
 input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2);}
+input[type=number]{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);font-size:12px;font-weight:600;padding:3px 6px;outline:none;width:68px;text-align:right;transition:border-color .2s;-moz-appearance:textfield;}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
+input[type=number]:focus{border-color:var(--blue);}
+.field-row{display:flex;align-items:center;gap:6px;}
+.field-row input[type=range]{flex:1;}
 input[type=text]{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);font-size:12px;font-family:monospace;padding:6px 9px;outline:none;width:100%;transition:border-color .2s;}
 input[type=text]:focus{border-color:var(--blue);}
 input[type=text]::placeholder{color:var(--text3);font-size:11px;}
@@ -102,12 +107,18 @@ footer{text-align:center;padding:18px;color:var(--text3);font-size:11px;border-t
         <div class="cst" id="stA"></div>
       </div>
       <div class="field">
-        <div class="fl"><span>Nadmorska visina (m)</span><span class="fval" id="asl1V">184 m</span></div>
-        <input type="range" id="asl1" min="0" max="2000" step="1" value="184" oninput="update()">
+        <div class="fl"><span>Nadmorska visina (m)</span></div>
+        <div class="field-row">
+          <input type="range" id="asl1" min="0" max="2000" step="1" value="184" oninput="syncNI('asl1',this.value);update()">
+          <input type="number" id="asl1_n" min="0" max="2000" step="1" value="184" oninput="syncSL('asl1',this.value);update()">
+        </div>
       </div>
       <div class="field">
-        <div class="fl"><span>Visina antene iznad tla (m)</span><span class="fval" id="h1V">30.5 m</span></div>
-        <input type="range" id="h1" min="1" max="100" step="0.5" value="30.5" oninput="update()">
+        <div class="fl"><span>Visina antene iznad tla (m)</span></div>
+        <div class="field-row">
+          <input type="range" id="h1" min="1" max="100" step="0.5" value="30.5" oninput="syncNI('h1',this.value);update()">
+          <input type="number" id="h1_n" min="1" max="100" step="0.5" value="30.5" oninput="syncSL('h1',this.value);update()">
+        </div>
       </div>
     </div>
   </div>
@@ -124,12 +135,18 @@ footer{text-align:center;padding:18px;color:var(--text3);font-size:11px;border-t
         <div class="cst" id="stB"></div>
       </div>
       <div class="field">
-        <div class="fl"><span>Nadmorska visina (m)</span><span class="fval" id="asl2V">253 m</span></div>
-        <input type="range" id="asl2" min="0" max="2000" step="1" value="253" oninput="update()">
+        <div class="fl"><span>Nadmorska visina (m)</span></div>
+        <div class="field-row">
+          <input type="range" id="asl2" min="0" max="2000" step="1" value="253" oninput="syncNI('asl2',this.value);update()">
+          <input type="number" id="asl2_n" min="0" max="2000" step="1" value="253" oninput="syncSL('asl2',this.value);update()">
+        </div>
       </div>
       <div class="field">
-        <div class="fl"><span>Visina antene iznad tla (m)</span><span class="fval" id="h2V">15.5 m</span></div>
-        <input type="range" id="h2" min="1" max="100" step="0.5" value="15.5" oninput="update()">
+        <div class="fl"><span>Visina antene iznad tla (m)</span></div>
+        <div class="field-row">
+          <input type="range" id="h2" min="1" max="100" step="0.5" value="15.5" oninput="syncNI('h2',this.value);update()">
+          <input type="number" id="h2_n" min="1" max="100" step="0.5" value="15.5" oninput="syncSL('h2',this.value);update()">
+        </div>
       </div>
     </div>
   </div>
@@ -138,12 +155,18 @@ footer{text-align:center;padding:18px;color:var(--text3);font-size:11px;border-t
     <div class="ph"><div class="dot dot-blue"></div>Parametri linka</div>
     <div class="pb">
       <div class="field">
-        <div class="fl"><span>Udaljenost (km)</span><span class="fval" id="distV">1.024 km</span></div>
-        <input type="range" id="dist" min="0.1" max="50" step="0.05" value="1.024" oninput="update()">
+        <div class="fl"><span>Udaljenost (km)</span></div>
+        <div class="field-row">
+          <input type="range" id="dist" min="0.1" max="50" step="0.05" value="1.024" oninput="syncNI('dist',this.value);update()">
+          <input type="number" id="dist_n" min="0.1" max="50" step="0.05" value="1.024" oninput="syncSL('dist',this.value);update()">
+        </div>
       </div>
       <div class="field">
-        <div class="fl"><span>Frekvencija (GHz)</span><span class="fval" id="freqV">5.8 GHz</span></div>
-        <input type="range" id="freq" min="1" max="60" step="0.1" value="5.8" oninput="update()">
+        <div class="fl"><span>Frekvencija (GHz)</span></div>
+        <div class="field-row">
+          <input type="range" id="freq" min="1" max="60" step="0.1" value="5.8" oninput="syncNI('freq',this.value);update()">
+          <input type="number" id="freq_n" min="1" max="60" step="0.1" value="5.8" oninput="syncSL('freq',this.value);update()">
+        </div>
       </div>
     </div>
   </div>
@@ -155,7 +178,19 @@ footer{text-align:center;padding:18px;color:var(--text3);font-size:11px;border-t
       <button class="add-btn" onclick="addObs()">+ Dodaj prepreku</button>
     </div>
   </div>
-</div>
+
+  <!-- Terrain Scan -->
+  <div class="panel">
+    <div class="ph"><div class="dot dot-red"></div>Auto-skeniranje terena (SRTM)</div>
+    <div class="pb">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px;">Dohvata visine terena duž cijele trase i automatski pronalazi kritične prepreke koje ulaze u Fresnelovu zonu.</div>
+      <button class="cbtn" id="scanBtn" onclick="scanTerrain()" style="width:100%;padding:8px;font-size:13px;">Skeniraj teren</button>
+      <div id="scanStatus" style="font-size:11px;min-height:15px;margin-top:8px;"></div>
+      <div id="scanResults" style="display:none;margin-top:10px;"></div>
+    </div>
+  </div>
+
+</div><!-- end left column -->
 
 <!-- RIGHT -->
 <div>
@@ -170,19 +205,135 @@ footer{text-align:center;padding:18px;color:var(--text3);font-size:11px;border-t
   <div class="sb sb-ok" id="sbox"><span id="stxt">Izračunavanje...</span></div>
   <div id="otWrap" style="display:none;margin-bottom:13px;">
     <table class="otable">
-      <thead><tr><th>#</th><th>Naziv</th><th>Visina</th><th>Poz.</th><th>LOS na poz.</th><th>Clearance</th><th>Status</th></tr></thead>
+      <thead><tr><th>#</th><th>Naziv</th><th>Visina</th><th>Od A (km)</th><th>LOS na poz.</th><th>Clearance</th><th>Status</th></tr></thead>
       <tbody id="otBody"></tbody>
     </table>
   </div>
   <div class="cw"><canvas id="profile"></canvas></div>
+  <div style="margin-top:10px;display:flex;gap:8px;">
+    <button class="cbtn" onclick="generateReport()" style="flex:1;padding:10px;font-size:13px;font-weight:600;">Generiši izvještaj (PDF)</button>
+  </div>
 </div>
 </main>
 <footer>Fresnel Kalkulator v2.0 — XPT Radio Projekt &nbsp;|&nbsp; r₁ = 17.3 × √(d₁×d₂ / f×d) &nbsp;|&nbsp; Nadmorske visine: Open-Elevation API (SRTM)</footer>
 
 <script>
 let obstacles = [], oid = 0;
+let terrainData = []; // [{x: km, y: asl_m}, ...]
 
-// ── DMS / Decimal koordinate parser ─────────────────────────
+// ── Terrain scan ─────────────────────────────────────────────
+async function scanTerrain() {
+  const coordA = parseDMS(document.getElementById('coordA').value);
+  const coordB = parseDMS(document.getElementById('coordB').value);
+  const st = document.getElementById('scanStatus');
+  const res = document.getElementById('scanResults');
+  const btn = document.getElementById('scanBtn');
+
+  if (!coordA || !coordB) {
+    st.className='cst cerr';
+    st.textContent='Unesi koordinate lokacije A i B prije skeniranja.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Skeniranje...';
+  st.className='cst cload';
+  res.style.display='none';
+
+  const N = 40; // 40 tačaka duž trase
+  const lats=[], lons=[];
+  for(let i=0;i<=N;i++){
+    const t=i/N;
+    lats.push((coordA.lat+(coordB.lat-coordA.lat)*t).toFixed(6));
+    lons.push((coordA.lon+(coordB.lon-coordA.lon)*t).toFixed(6));
+  }
+
+  st.textContent='Dohvatam '+(N+1)+' tačaka terena...';
+
+  try {
+    const r = await fetch(
+      `https://api.open-meteo.com/v1/elevation?latitude=${lats.join(',')}&longitude=${lons.join(',')}`
+    );
+    if(!r.ok) throw new Error('API greška '+r.status);
+    const d = await r.json();
+    if(!Array.isArray(d.elevation)) throw new Error('Neočekivan odgovor API-ja');
+
+    const dist = +document.getElementById('dist').value;
+    terrainData = d.elevation.map((elev,i)=>({ x: (i/N)*dist, y: elev }));
+
+    // Pronađi kritične prepreke
+    const asl1=+document.getElementById('asl1').value + +document.getElementById('h1').value;
+    const asl2=+document.getElementById('asl2').value + +document.getElementById('h2').value;
+    const freq=+document.getElementById('freq').value;
+
+    const critical = [];
+    terrainData.forEach((pt,i)=>{
+      if(i===0||i===N) return;
+      const d1=pt.x, d2=dist-pt.x;
+      const r1=17.3*Math.sqrt((d1*d2)/(freq*dist));
+      const los=asl1+(asl2-asl1)*(pt.x/dist);
+      const clearance=los-r1-pt.y;
+      const pct=clearance/r1*100;
+      if(pct<60) critical.push({...pt, clearance:clearance.toFixed(1), pct:Math.round(pct), r1:r1.toFixed(1), los:los.toFixed(1)});
+    });
+
+    // Sortiraj — najkritičnije prvo
+    critical.sort((a,b)=>a.clearance-b.clearance);
+
+    st.className='cst cok';
+    st.textContent=`✓ Skeniranje završeno — ${terrainData.length} tačaka, ${critical.length} kritičnih zona`;
+
+    // Prikaži rezultate
+    if(critical.length===0){
+      res.style.display='block';
+      res.innerHTML=`<div style="background:var(--green-dim);border:1px solid rgba(62,207,142,0.2);border-radius:var(--rs);padding:9px 12px;font-size:12px;color:var(--green);">✓ Teren slobodan — nema prepreka koje ulaze u Fresnelovu zonu</div>`;
+    } else {
+      const rows = critical.slice(0,5).map((p,i)=>`
+        <tr>
+          <td style="color:var(--text2)">${i+1}</td>
+          <td>${p.x.toFixed(2)} km</td>
+          <td>${Math.round(p.y)} m</td>
+          <td style="color:${p.clearance<0?'var(--red)':p.pct<60?'var(--amber)':'var(--green)'}">${p.clearance} m</td>
+          <td><button class="cbtn" style="padding:3px 8px;font-size:10px;" onclick="addObsFromScan(${p.x.toFixed(3)},${Math.round(p.y)},${i+1})">+ Dodaj</button></td>
+        </tr>`).join('');
+      res.style.display='block';
+      res.innerHTML=`
+        <div style="font-size:11px;color:var(--text2);margin-bottom:6px;">Pronađeno ${critical.length} kritičnih zona (prikazano top 5):</div>
+        <table style="width:100%;border-collapse:collapse;font-size:11px;">
+          <thead><tr style="color:var(--text2)"><th style="text-align:left;padding:4px 6px;border-bottom:1px solid var(--border)">Br.</th><th style="text-align:left;padding:4px 6px;border-bottom:1px solid var(--border)">Od A</th><th style="text-align:left;padding:4px 6px;border-bottom:1px solid var(--border)">Visina</th><th style="text-align:left;padding:4px 6px;border-bottom:1px solid var(--border)">Clearance</th><th style="padding:4px 6px;border-bottom:1px solid var(--border)"></th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    }
+
+    update();
+  } catch(e) {
+    st.className='cst cerr';
+    st.textContent='Greška: '+e.message;
+  }
+
+  btn.disabled=false;
+  btn.textContent='Skeniraj teren';
+}
+
+function addObsFromScan(km, asl, num) {
+  if(obstacles.length>=5) return;
+  const id=++oid;
+  obstacles.push({id, name:'Prepreka '+num+' (teren)', asl, pos:km});
+  renderObs();
+  update();
+  // Skroluj do prepreka
+  document.getElementById('obsList').scrollIntoView({behavior:'smooth'});
+}
+
+// ── Sync slajder ↔ number input ──────────────────────────────
+function syncNI(id, val) {
+  const ni = document.getElementById(id+'_n');
+  if (ni) ni.value = val;
+}
+function syncSL(id, val) {
+  const sl = document.getElementById(id);
+  if (sl) { const v = Math.min(Math.max(+val, +sl.min), +sl.max); sl.value = v; }
+}
 function parseDMS(s) {
   s = s.trim().replace(/\s+/g,' ');
   // Decimal degrees: 44.75098, 17.838481  or  44.75098 17.838481
@@ -237,10 +388,14 @@ async function fetchElev(side) {
   const coords = parseDMS(inp.value);
   if (!coords) { st.className='cst cerr'; st.textContent='Neispravne koordinate — primjer: 44°45\'03.50"N 17°50\'18.56"E'; return; }
   st.className='cst cload'; st.textContent='Dohvatam visinu za ('+coords.lat.toFixed(5)+', '+coords.lon.toFixed(5)+')...';
+  // Reset terrain kada se promijene koordinate
+  terrainData=[];
+  document.getElementById('scanStatus').textContent='';
+  document.getElementById('scanResults').style.display='none';
   try {
     const e = await getElev(coords.lat, coords.lon);
     document.getElementById(aslId).value = Math.round(e);
-    document.getElementById(valId).textContent = Math.round(e)+' m';
+    syncNI(aslId, Math.round(e));
     st.className='cst cok'; st.textContent='✓ Nadmorska visina: '+Math.round(e)+' m  ('+coords.lat.toFixed(5)+', '+coords.lon.toFixed(5)+')';
     update();
   } catch(err) { st.className='cst cerr'; st.textContent='Greška: '+err.message+' — pokušaj ručno unijeti visinu slajderom'; }
@@ -256,8 +411,7 @@ async function fetchElevObs(obsId, idx) {
     const e = await getElev(coords.lat, coords.lon);
     obstacles[idx].asl = Math.round(e);
     const sl = document.getElementById('oasl'+obsId);
-    const vl = document.getElementById('oaslV'+obsId);
-    if (sl) { sl.value=Math.round(e); vl.textContent=Math.round(e)+' m'; }
+    if (sl) { sl.value=Math.round(e); syncNI('oasl'+obsId, Math.round(e)); }
     st.className='cst cok'; st.textContent='✓ '+Math.round(e)+' m';
     update();
   } catch(err) { st.className='cst cerr'; st.textContent='Greška: '+err.message; }
@@ -267,7 +421,7 @@ async function fetchElevObs(obsId, idx) {
 function addObs() {
   if (obstacles.length >= 5) return;
   const id = ++oid;
-  obstacles.push({id, name:'Prepreka '+id, asl:210, pos:50});
+  obstacles.push({id, name:'Prepreka '+id, asl:210, pos:0.5});
   renderObs(); update();
 }
 function delObs(id) { obstacles=obstacles.filter(o=>o.id!==id); renderObs(); update(); }
@@ -295,12 +449,18 @@ function renderObs() {
       </div>
       <div class="obs-grid">
         <div class="field">
-          <div class="fl"><span style="font-size:11px">Nadm. visina (m)</span><span class="fval" style="font-size:12px" id="oaslV${o.id}">${o.asl} m</span></div>
-          <input type="range" id="oasl${o.id}" min="0" max="2000" step="1" value="${o.asl}" oninput="obstacles[${i}].asl=+this.value;document.getElementById('oaslV${o.id}').textContent=this.value+' m';update()">
+          <div class="fl"><span style="font-size:11px">Nadm. visina (m)</span></div>
+          <div class="field-row">
+            <input type="range" id="oasl${o.id}" min="0" max="2000" step="1" value="${o.asl}" oninput="obstacles[${i}].asl=+this.value;syncNI('oasl${o.id}',this.value);update()">
+            <input type="number" id="oasl${o.id}_n" min="0" max="2000" step="1" value="${o.asl}" style="width:60px" oninput="obstacles[${i}].asl=+this.value;syncSL('oasl${o.id}',this.value);update()">
+          </div>
         </div>
         <div class="field">
-          <div class="fl"><span style="font-size:11px">Pozicija (%)</span><span class="fval" style="font-size:12px" id="oposV${o.id}">${o.pos}%</span></div>
-          <input type="range" id="opos${o.id}" min="1" max="99" step="1" value="${o.pos}" oninput="obstacles[${i}].pos=+this.value;document.getElementById('oposV${o.id}').textContent=this.value+'%';update()">
+          <div class="fl"><span style="font-size:11px">Daljina od A (km)</span></div>
+          <div class="field-row">
+            <input type="range" id="opos${o.id}" min="0.01" max="${(+document.getElementById('dist').value*0.99).toFixed(2)}" step="0.01" value="${o.pos}" oninput="obstacles[${i}].pos=+this.value;syncNI('opos${o.id}',this.value);update()">
+            <input type="number" id="opos${o.id}_n" min="0.01" max="${(+document.getElementById('dist').value*0.99).toFixed(2)}" step="0.01" value="${o.pos}" style="width:60px" oninput="obstacles[${i}].pos=+this.value;syncSL('opos${o.id}',this.value);update()">
+          </div>
         </div>
       </div>`;
     list.appendChild(d);
@@ -316,12 +476,21 @@ function update() {
   const dist=+document.getElementById('dist').value;
   const freq=+document.getElementById('freq').value;
 
-  document.getElementById('asl1V').textContent=asl1+' m';
-  document.getElementById('h1V').textContent=h1ag.toFixed(1)+' m';
-  document.getElementById('asl2V').textContent=asl2+' m';
-  document.getElementById('h2V').textContent=h2ag.toFixed(1)+' m';
-  document.getElementById('distV').textContent=dist.toFixed(3)+' km';
-  document.getElementById('freqV').textContent=freq.toFixed(1)+' GHz';
+  document.getElementById('asl1V') && (document.getElementById('asl1V').textContent=asl1+' m');
+  document.getElementById('h1V')   && (document.getElementById('h1V').textContent=h1ag.toFixed(1)+' m');
+  document.getElementById('asl2V') && (document.getElementById('asl2V').textContent=asl2+' m');
+  document.getElementById('h2V')   && (document.getElementById('h2V').textContent=h2ag.toFixed(1)+' m');
+  document.getElementById('distV') && (document.getElementById('distV').textContent=dist.toFixed(3)+' km');
+  document.getElementById('freqV') && (document.getElementById('freqV').textContent=freq.toFixed(1)+' GHz');
+
+  // Ažuriraj max slajdera za svaku prepreku prema trenutnoj udaljenosti
+  obstacles.forEach(o=>{
+    const sl=document.getElementById('opos'+o.id);
+    const ni=document.getElementById('opos'+o.id+'_n');
+    const mx=(dist*0.99).toFixed(2);
+    if(sl){ sl.max=mx; if(o.pos>dist*0.99){o.pos=+(dist*0.99).toFixed(2);sl.value=o.pos;if(ni)ni.value=o.pos;} }
+    if(ni){ ni.max=mx; }
+  });
 
   const ant1=asl1+h1ag, ant2=asl2+h2ag;
   const r1mid=17.3*Math.sqrt((dist/2*dist/2)/(freq*dist));
@@ -336,7 +505,8 @@ function update() {
 
   let worst='ok';
   const res=obstacles.map(o=>{
-    const p=o.pos/100, d1=dist*p, d2=dist*(1-p);
+    const d1=Math.min(o.pos, dist*0.999), d2=dist-d1;
+    const p=d1/dist;
     const r=17.3*Math.sqrt((d1*d2)/(freq*dist));
     const los=ant1+(ant2-ant1)*p;
     const clr=los-r-o.asl;
@@ -345,7 +515,7 @@ function update() {
     else if(clr<r*0.4) s='warn';
     if(s==='block') worst='block';
     else if(s==='warn'&&worst!=='block') worst='warn';
-    return{...o,los:los.toFixed(1),clr:clr.toFixed(1),r,s};
+    return{...o,d1,los:los.toFixed(1),clr:clr.toFixed(1),r,s};
   });
 
   const sb=document.getElementById('sbox');
@@ -363,7 +533,7 @@ function update() {
       <td style="color:var(--text2)">${i+1}</td>
       <td>${o.name}</td>
       <td>${o.asl} m</td>
-      <td>${o.pos}%</td>
+      <td>${o.d1.toFixed(2)} km</td>
       <td>${o.los} m</td>
       <td style="color:${o.s==='block'?'var(--red)':o.s==='warn'?'var(--amber)':'var(--green)'}">${o.clr} m</td>
       <td><span class="pill ${o.s==='block'?'pblock':o.s==='warn'?'pwarn':'pok'}">${o.s==='block'?'BLOKIRAN':o.s==='warn'?'Pažnja':'OK'}</span></td>
@@ -383,23 +553,46 @@ function draw(asl1,h1ag,asl2,h2ag,dist,freq,ant1,ant2,res){
   for(let i=0;i<=N;i++){
     const t=i/N,x=t*dist,d1=x,d2=dist-x;
     const r=(i===0||i===N)?0:17.3*Math.sqrt((d1*d2)/(freq*dist));
-    const los=ant1+(ant2-ant1)*t, g=asl1+(asl2-asl1)*t;
+    const los=ant1+(ant2-ant1)*t;
+    // Koristi SRTM teren ako je dostupan, inače linearna interpolacija
+    let g;
+    if(terrainData.length>1){
+      // Interpoliraj iz terrainData
+      const tx=x;
+      let lo=terrainData[0], hi=terrainData[terrainData.length-1];
+      for(let j=0;j<terrainData.length-1;j++){
+        if(terrainData[j].x<=tx && terrainData[j+1].x>=tx){ lo=terrainData[j]; hi=terrainData[j+1]; break; }
+      }
+      const span=hi.x-lo.x;
+      g=span>0 ? lo.y+(hi.y-lo.y)*((tx-lo.x)/span) : lo.y;
+    } else {
+      g=asl1+(asl2-asl1)*t;
+    }
     frT.push({x,y:los+r}); frB.push({x,y:los-r}); gnd.push({x,y:g});
   }
   const allY=[...frT.map(p=>p.y),...frB.map(p=>p.y),...gnd.map(p=>p.y)];
   res.forEach(o=>allY.push(o.asl));
+  if(terrainData.length) terrainData.forEach(p=>allY.push(p.y));
   const minY=Math.min(...allY)-5, maxY=Math.max(...allY)+12;
   const sx=x=>pad.l+(x/dist)*gW, sy=y=>pad.t+gH-((y-minY)/(maxY-minY))*gH;
   ctx.clearRect(0,0,W,H);
   // grid
   ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=0.5;
   [.25,.5,.75].forEach(t=>{const gy=sy(minY+t*(maxY-minY));ctx.beginPath();ctx.moveTo(pad.l,gy);ctx.lineTo(pad.l+gW,gy);ctx.stroke();});
-  // ground fill
-  ctx.beginPath(); gnd.forEach((p,i)=>i===0?ctx.moveTo(sx(p.x),sy(p.y)):ctx.lineTo(sx(p.x),sy(p.y)));
+  // ground fill — koristi realni teren ili gnd
+  const groundPts = terrainData.length>1 ? terrainData : gnd;
+  ctx.beginPath(); groundPts.forEach((p,i)=>i===0?ctx.moveTo(sx(p.x),sy(p.y)):ctx.lineTo(sx(p.x),sy(p.y)));
   ctx.lineTo(sx(dist),sy(minY));ctx.lineTo(sx(0),sy(minY));ctx.closePath();
-  ctx.fillStyle='rgba(100,90,70,0.18)';ctx.fill();
-  ctx.beginPath(); gnd.forEach((p,i)=>i===0?ctx.moveTo(sx(p.x),sy(p.y)):ctx.lineTo(sx(p.x),sy(p.y)));
-  ctx.strokeStyle='rgba(150,135,100,0.4)';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.fillStyle='rgba(100,90,70,0.22)';ctx.fill();
+  ctx.beginPath(); groundPts.forEach((p,i)=>i===0?ctx.moveTo(sx(p.x),sy(p.y)):ctx.lineTo(sx(p.x),sy(p.y)));
+  // Ako je realni teren, narandžasta linija; inače siva
+  ctx.strokeStyle=terrainData.length>1?'rgba(180,130,80,0.7)':'rgba(150,135,100,0.4)';
+  ctx.lineWidth=terrainData.length>1?2:1.5;ctx.stroke();
+  // Oznaka da je SRTM teren
+  if(terrainData.length>1){
+    ctx.font='10px sans-serif';ctx.fillStyle='rgba(180,130,80,0.7)';ctx.textAlign='right';
+    ctx.fillText('SRTM teren',pad.l+gW,pad.t+gH+16);
+  }
   // Fresnel
   ctx.beginPath(); frT.forEach((p,i)=>i===0?ctx.moveTo(sx(p.x),sy(p.y)):ctx.lineTo(sx(p.x),sy(p.y)));
   frB.slice().reverse().forEach(p=>ctx.lineTo(sx(p.x),sy(p.y))); ctx.closePath();
@@ -413,7 +606,7 @@ function draw(asl1,h1ag,asl2,h2ag,dist,freq,ant1,ant2,res){
   ctx.strokeStyle='#4a9eff';ctx.lineWidth=2;ctx.stroke();
   // Obstacles
   res.forEach((o,i)=>{
-    const ox=dist*o.pos/100;
+    const ox=o.d1;
     const col=o.s==='block'?'rgba(255,92,92,0.85)':o.s==='warn'?'rgba(245,166,35,0.75)':'rgba(245,166,35,0.35)';
     ctx.fillStyle=col;
     ctx.fillRect(sx(ox)-5,sy(o.asl),10,sy(minY)-sy(o.asl));
@@ -436,6 +629,220 @@ function draw(asl1,h1ag,asl2,h2ag,dist,freq,ant1,ant2,res){
 ['asl1','h1','asl2','h2','dist','freq'].forEach(id=>document.getElementById(id).addEventListener('input',update));
 update();
 window.addEventListener('resize',update);
+
+// ── Generate Report ───────────────────────────────────────────
+function generateReport() {
+  // Pokupi sve podatke
+  const linkName = document.getElementById('linkName').value || 'P2P Link';
+  const coordA   = document.getElementById('coordA').value || '—';
+  const coordB   = document.getElementById('coordB').value || '—';
+  const asl1  = +document.getElementById('asl1').value;
+  const h1ag  = +document.getElementById('h1').value;
+  const asl2  = +document.getElementById('asl2').value;
+  const h2ag  = +document.getElementById('h2').value;
+  const dist  = +document.getElementById('dist').value;
+  const freq  = +document.getElementById('freq').value;
+  const ant1  = asl1 + h1ag, ant2 = asl2 + h2ag;
+  const r1mid = 17.3 * Math.sqrt((dist/2*dist/2)/(freq*dist));
+  const tilt  = (Math.atan2(ant2-ant1,dist*1000)*180/Math.PI).toFixed(2);
+  const statusEl = document.getElementById('sbox');
+  const statusTxt = document.getElementById('stxt').textContent;
+  const statusCls = statusEl.className.includes('sb-ok') ? 'ok' : statusEl.className.includes('sb-warn') ? 'warn' : 'danger';
+  const srtmActive = terrainData.length > 1;
+
+  // Izvuci grafikon kao sliku
+  const canvas = document.getElementById('profile');
+  const chartImg = canvas.toDataURL('image/png');
+
+  // Obstacles tabela
+  let obsRows = '';
+  if(obstacles.length > 0) {
+    const obsRes = obstacles.map(o => {
+      const d1 = Math.min(o.pos, dist*0.999), d2 = dist - d1, p = d1/dist;
+      const r  = 17.3*Math.sqrt((d1*d2)/(freq*dist));
+      const los = ant1+(ant2-ant1)*p;
+      const clr = los - r - o.asl;
+      const s   = clr < 0 ? 'BLOKIRAN' : clr < r*0.4 ? 'Pažnja' : 'OK';
+      const sc  = clr < 0 ? '#ff5c5c' : clr < r*0.4 ? '#f5a623' : '#3ecf8e';
+      return `<tr>
+        <td>${o.name}</td>
+        <td>${o.d1 !== undefined ? o.d1.toFixed(2) : o.pos.toFixed(2)} km</td>
+        <td>${o.asl} m</td>
+        <td>${los.toFixed(1)} m</td>
+        <td>${clr.toFixed(1)} m</td>
+        <td style="color:${sc};font-weight:600">${s}</td>
+      </tr>`;
+    });
+    obsRows = obsRes.join('');
+  }
+
+  // Terrain scan info
+  let terrainInfo = '';
+  if(srtmActive) {
+    const maxT = terrainData.reduce((a,b)=>a.y>b.y?a:b);
+    const minT = terrainData.reduce((a,b)=>a.y<b.y?a:b);
+    terrainInfo = `
+      <div class="section">
+        <div class="section-title">Profil terena (SRTM)</div>
+        <table><tr>
+          <td><span class="lbl">Tačke uzorkovanja</span><span class="val">${terrainData.length}</span></td>
+          <td><span class="lbl">Min. visina terena</span><span class="val">${Math.round(minT.y)} m na ${minT.x.toFixed(2)} km</span></td>
+          <td><span class="lbl">Max. visina terena</span><span class="val">${Math.round(maxT.y)} m na ${maxT.x.toFixed(2)} km</span></td>
+        </tr></table>
+      </div>`;
+  }
+
+  const statusColor = statusCls==='ok'?'#3ecf8e':statusCls==='warn'?'#f5a623':'#ff5c5c';
+  const statusBg    = statusCls==='ok'?'#0d2e1f':statusCls==='warn'?'#2e1f00':'#2e0d0d';
+  const now = new Date().toLocaleString('bs-BA');
+
+  const html = `<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8">
+<title>Izvještaj — ${linkName}</title>
+<style>
+  @page { margin: 18mm 16mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #1a1a2e; background: #fff; }
+
+  .header { display: flex; align-items: center; justify-content: space-between; padding: 16px 0 14px; border-bottom: 3px solid #4a9eff; margin-bottom: 18px; }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .logo { width: 38px; height: 38px; background: linear-gradient(135deg,#4a9eff,#1D9E75); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 20px; font-weight: 700; }
+  .header h1 { font-size: 18px; font-weight: 700; color: #0f1117; }
+  .header p  { font-size: 11px; color: #666; margin-top: 2px; }
+  .header-right { text-align: right; font-size: 10px; color: #888; }
+
+  .status-bar { border-radius: 8px; padding: 10px 16px; margin-bottom: 16px; font-size: 13px; font-weight: 600; color: ${statusColor}; background: ${statusBg}; border: 1px solid ${statusColor}40; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .card { background: #f4f6fb; border-radius: 8px; padding: 10px 13px; border: 1px solid #e0e4f0; }
+  .card .lbl { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+  .card .val { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+  .card .val.blue { color: #185FA5; }
+  .card .val.green { color: #0F6E56; }
+
+  .section { margin-bottom: 16px; }
+  .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #4a9eff; border-bottom: 1px solid #e0e4f0; padding-bottom: 5px; margin-bottom: 10px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  th { text-align: left; padding: 6px 8px; background: #f0f4ff; border-bottom: 2px solid #c8d4f0; font-weight: 600; color: #333; font-size: 10px; text-transform: uppercase; }
+  td { padding: 6px 8px; border-bottom: 1px solid #eef0f8; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: #fafbff; }
+  .lbl { font-size: 10px; color: #888; display: block; }
+  .val { font-size: 12px; font-weight: 600; display: block; }
+
+  .chart-wrap { border: 1px solid #e0e4f0; border-radius: 8px; overflow: hidden; margin-bottom: 14px; background: #0f1117; text-align: center; }
+  .chart-wrap img { width: 100%; display: block; }
+
+  .footer { margin-top: 20px; padding-top: 10px; border-top: 1px solid #e0e4f0; display: flex; justify-content: space-between; font-size: 9px; color: #aaa; }
+  .no-obs { background: #f0faf5; border: 1px solid #b0dfc8; border-radius: 6px; padding: 9px 13px; color: #0F6E56; font-size: 12px; }
+  .terrain-badge { display: inline-block; background: #fff3e0; border: 1px solid #f5a623; border-radius: 4px; padding: 2px 7px; font-size: 10px; color: #854F0B; font-weight: 600; margin-left: 8px; }
+
+  @media print {
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .no-print { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">F</div>
+    <div>
+      <h1>${linkName}</h1>
+      <p>P2P Radio Link — Fresnel Kalkulator Izvještaj</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div>Datum: <strong>${now}</strong></div>
+    <div style="margin-top:3px">Fresnel Kalkulator v2.0 — XPT Projekt</div>
+    ${srtmActive ? '<div style="margin-top:3px;color:#f5a623;font-weight:600">✓ SRTM teren aktivan</div>' : ''}
+  </div>
+</div>
+
+<div class="status-bar">${statusTxt}</div>
+
+<div class="section">
+  <div class="section-title">Lokacije</div>
+  <div class="grid2">
+    <div class="card">
+      <div class="lbl">Lokacija A</div>
+      <div class="val blue">${coordA || '—'}</div>
+      <div style="margin-top:6px;display:flex;gap:16px;">
+        <div><span class="lbl">Nadm. visina</span><span class="val">${asl1} m</span></div>
+        <div><span class="lbl">Visina antene</span><span class="val">${h1ag} m AGL</span></div>
+        <div><span class="lbl">Apsolutno</span><span class="val">${ant1.toFixed(1)} m</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="lbl">Lokacija B</div>
+      <div class="val blue">${coordB || '—'}</div>
+      <div style="margin-top:6px;display:flex;gap:16px;">
+        <div><span class="lbl">Nadm. visina</span><span class="val">${asl2} m</span></div>
+        <div><span class="lbl">Visina antene</span><span class="val">${h2ag} m AGL</span></div>
+        <div><span class="lbl">Apsolutno</span><span class="val">${ant2.toFixed(1)} m</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Parametri linka</div>
+  <div class="grid3">
+    <div class="card"><div class="lbl">Udaljenost</div><div class="val">${dist.toFixed(3)} km</div></div>
+    <div class="card"><div class="lbl">Frekvencija</div><div class="val">${freq.toFixed(1)} GHz</div></div>
+    <div class="card"><div class="lbl">Tilt A→B</div><div class="val">${(tilt>=0?'+':'')+tilt}°</div></div>
+    <div class="card"><div class="lbl">F1 poluprecnik (sredina)</div><div class="val green">${r1mid.toFixed(1)} m</div></div>
+    <div class="card"><div class="lbl">60% F1 — minimum slobodno</div><div class="val green">${(r1mid*0.6).toFixed(1)} m</div></div>
+    <div class="card"><div class="lbl">Broj prepreka</div><div class="val">${obstacles.length}</div></div>
+  </div>
+</div>
+
+${terrainInfo}
+
+<div class="section">
+  <div class="section-title">Profil linka ${srtmActive ? '<span class="terrain-badge">SRTM teren</span>' : ''}</div>
+  <div class="chart-wrap">
+    <img src="${chartImg}" alt="Profil linka">
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Prepreke</div>
+  ${obstacles.length === 0
+    ? '<div class="no-obs">✓ Nema definisanih prepreka</div>'
+    : `<table>
+        <thead><tr>
+          <th>Naziv</th><th>Od A (km)</th><th>Visina (m)</th>
+          <th>LOS na poz. (m)</th><th>Clearance (m)</th><th>Status</th>
+        </tr></thead>
+        <tbody>${obsRows}</tbody>
+       </table>`
+  }
+</div>
+
+<div class="footer">
+  <div>Fresnel Kalkulator v2.0 — XPT Radio Projekt</div>
+  <div>r₁ = 17.3 × √(d₁×d₂ / f×d) | Elevation: Open-Meteo SRTM API</div>
+  <div>${now}</div>
+</div>
+
+<div class="no-print" style="margin-top:20px;text-align:center;">
+  <button onclick="window.print()" style="background:#4a9eff;border:none;color:#fff;padding:10px 28px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Štampaj / Sačuvaj kao PDF</button>
+  <button onclick="window.close()" style="background:#222636;border:1px solid #444;color:#e8e6f0;padding:10px 20px;border-radius:8px;font-size:14px;cursor:pointer;margin-left:10px;">Zatvori</button>
+</div>
+
+</body>
+</html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+}
 </script>
 </body>
 </html>
