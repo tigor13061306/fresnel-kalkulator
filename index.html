@@ -1,0 +1,2216 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fresnel Kalkulator — P2P Radio Link</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f8fafc;--bg2:#ffffff;--bg3:#f1f5f9;--bg4:#e2e8f0;
+  --border:#e2e8f0;--border2:#cbd5e1;
+  --text:#1e293b;--text2:#64748b;--text3:#94a3b8;
+  --blue:#3b82f6;--blue-dim:rgba(59,130,246,0.1);--blue-mid:rgba(59,130,246,0.2);
+  --green:#10b981;--green-dim:rgba(16,185,129,0.1);
+  --amber:#f59e0b;--amber-dim:rgba(245,158,11,0.1);
+  --red:#ef4444;--red-dim:rgba(239,68,68,0.1);
+  --teal:#0ea5e9;--r:10px;--rs:6px;
+  --shadow:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 6px -1px rgba(0,0,0,0.07),0 2px 4px -2px rgba(0,0,0,0.05);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:999px;}
+::-webkit-scrollbar-thumb:hover{background:var(--text3);}
+/* SIDEBAR LAYOUT */
+.app-shell{display:flex;height:100vh;overflow:hidden;}
+.sidebar{width:320px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
+.main-area{flex:1;overflow:hidden;display:flex;flex-direction:column;min-width:0;height:100vh;}
+/* SIDEBAR HEADER */
+.sidebar-header{padding:20px 20px 16px;border-bottom:1px solid var(--border);}
+.sidebar-logo{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.logo{width:38px;height:38px;background:linear-gradient(135deg,var(--blue),var(--teal));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;flex-shrink:0;box-shadow:0 2px 8px rgba(59,130,246,0.3);}
+.sidebar-title{font-size:13px;font-weight:900;letter-spacing:-.01em;text-transform:uppercase;line-height:1;}
+.sidebar-sub{font-size:9px;color:var(--text2);margin-top:2px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+.sidebar-actions{display:flex;gap:6px;}
+.sidebar-btn{flex:1;background:var(--bg);border:1px solid var(--border2);border-radius:8px;color:var(--text2);font-size:9px;font-weight:700;padding:7px 6px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:4px;text-transform:uppercase;letter-spacing:.03em;}
+.sidebar-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-dim);}
+.sidebar-btn.save:hover{border-color:var(--green);color:#059669;background:var(--green-dim);}
+/* SIDEBAR NAV */
+.sidebar-nav{flex:1;overflow-y:auto;padding:12px;}
+.nav-section-label{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);padding:0 8px;margin-bottom:6px;margin-top:8px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:all .15s;border:1px solid transparent;margin-bottom:4px;}
+.nav-item:hover{background:var(--bg3);border-color:var(--border);}
+.nav-item.active{background:var(--blue-dim);border-color:var(--blue-mid);color:var(--blue);}
+.nav-item-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.nav-item.active .nav-item-icon{background:var(--blue);color:#fff;}
+.nav-item:not(.active) .nav-item-icon{background:var(--bg3);}
+.nav-item-text{flex:1;min-width:0;}
+.nav-item-name{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.nav-item.active .nav-item-name{color:var(--blue);}
+.nav-item-sub{font-size:10px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px;}
+.nav-status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.nav-del{background:none;border:none;padding:4px;cursor:pointer;color:transparent;border-radius:5px;transition:all .15s;font-size:13px;line-height:1;}
+.nav-item:hover .nav-del{color:var(--text3);}
+.nav-del:hover{background:rgba(239,68,68,0.1);color:var(--red)!important;}
+.nav-add-btn{width:100%;border:1.5px dashed var(--border2);border-radius:10px;background:transparent;color:var(--text2);font-size:11px;font-weight:700;padding:10px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px;}
+.nav-add-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-dim);}
+/* SIDEBAR FOOTER */
+.sidebar-footer{padding:12px 16px;border-top:1px solid var(--border);background:var(--bg3);}
+/* MAIN HEADER (top bar) */
+header{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.badge{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue-mid);border-radius:20px;padding:3px 11px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;}
+.logo{width:34px;height:34px;background:linear-gradient(135deg,var(--blue),var(--teal));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;box-shadow:0 2px 8px rgba(59,130,246,0.3);}
+header h1{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-0.01em;}
+header p{font-size:11px;color:var(--text2);margin-top:1px;}
+.badge{background:var(--blue-dim);color:var(--blue);border:1px solid var(--blue-mid);border-radius:20px;padding:3px 11px;font-size:11px;font-weight:600;}
+/* Tab bar hidden — navigation moved to sidebar */
+.tabs-bar{display:none;}
+.tab-status,.tab-del,.add-tab-btn{display:none;}
+.tab-content{display:none;flex:1;overflow-y:auto;padding:24px;height:calc(100vh - 58px - 41px);}
+.tab-content.active{display:block;}
+.tc-inner{display:grid;grid-template-columns:380px 1fr;gap:20px;align-items:start;max-width:1100px;margin:0 auto;}
+.left-col{display:flex;flex-direction:column;gap:0;}
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:12px;box-shadow:var(--shadow);}
+.panel:last-child{margin-bottom:0;}
+.ph{padding:10px 14px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);display:flex;align-items:center;gap:7px;background:var(--bg3);}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.dot-blue{background:var(--blue);}.dot-green{background:var(--green);}.dot-amber{background:var(--amber);}.dot-red{background:var(--red);}
+.pb{padding:12px 14px;}
+.field{margin-bottom:10px;}.field:last-child{margin-bottom:0;}
+.fl{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.fl span:first-child{font-size:12px;color:var(--text2);font-weight:500;}
+.field-row{display:flex;align-items:center;gap:6px;}
+.field-row input[type=range]{flex:1;}
+input[type=range]{-webkit-appearance:none;width:100%;height:3px;background:var(--bg4);border-radius:2px;outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--blue);cursor:pointer;border:2.5px solid #fff;box-shadow:0 1px 4px rgba(59,130,246,0.4);transition:transform .15s;}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15);}
+input[type=number]{background:var(--bg);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);font-size:12px;font-weight:600;padding:4px 7px;outline:none;width:68px;text-align:right;transition:border-color .2s,box-shadow .2s;-moz-appearance:textfield;}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
+input[type=number]:focus,input[type=text]:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-dim);outline:none;}
+input[type=text]{background:var(--bg);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);font-size:12px;font-family:'Inter',inherit;padding:7px 10px;outline:none;width:100%;transition:border-color .2s,box-shadow .2s;}
+input[type=text]::placeholder{color:var(--text3);font-size:11px;}
+.coord-box{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;margin-bottom:9px;}
+.coord-lbl{font-size:11px;color:var(--text2);font-weight:500;margin-bottom:5px;}
+.coord-row{display:flex;gap:6px;align-items:center;}
+.cbtn{background:var(--blue);border:none;color:#fff;border-radius:var(--rs);padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:opacity .2s,box-shadow .2s;box-shadow:0 1px 3px rgba(59,130,246,0.35);}
+.cbtn:hover{opacity:.88;box-shadow:0 2px 8px rgba(59,130,246,0.45);}
+.cst{font-size:11px;min-height:14px;margin-top:3px;}
+.cok{color:var(--green);font-weight:500;}.cerr{color:var(--red);font-weight:500;}.cload{color:var(--amber);font-weight:500;}
+.obs-list{display:flex;flex-direction:column;gap:8px;}
+.obs-item{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;}
+.obs-hdr{display:flex;align-items:center;gap:7px;margin-bottom:8px;}
+.obs-num{width:20px;height:20px;border-radius:50%;background:rgba(245,158,11,0.15);color:#d97706;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.obs-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:15px;padding:0;line-height:1;transition:color .2s;margin-left:auto;}
+.obs-del:hover{color:var(--red);}
+.obs-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.obs-grid .field{margin-bottom:0;}
+.add-btn{width:100%;background:transparent;border:1.5px dashed var(--border2);border-radius:var(--rs);color:var(--text2);font-size:12px;font-weight:500;padding:8px;cursor:pointer;transition:all .2s;margin-top:8px;}
+.add-btn:hover{border-color:var(--amber);color:#d97706;background:var(--amber-dim);}
+.results{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.rc{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 13px;box-shadow:var(--shadow);}
+.rlbl{font-size:10px;color:var(--text2);margin-bottom:3px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+.rval{font-size:20px;font-weight:700;color:var(--text);}
+.rval.blue{color:var(--blue);}.rval.green{color:#059669;}.rval.amber{color:#d97706;}.rval.red{color:#dc2626;}
+.sb{border-radius:var(--rs);padding:10px 14px;font-size:13px;font-weight:600;margin-bottom:12px;}
+.sb-ok{background:rgba(16,185,129,0.08);color:#059669;border:1px solid rgba(16,185,129,0.25);}
+.sb-warn{background:rgba(245,158,11,0.08);color:#d97706;border:1px solid rgba(245,158,11,0.25);}
+.sb-danger{background:rgba(239,68,68,0.08);color:#dc2626;border:1px solid rgba(239,68,68,0.25);}
+.otable{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:12px;border-radius:var(--r);overflow:hidden;border:1px solid var(--border);}
+.otable th{text-align:left;padding:8px 11px;border-bottom:2px solid var(--border);color:var(--text2);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.06em;background:var(--bg3);}
+.otable td{padding:8px 11px;border-bottom:1px solid var(--border);color:var(--text);}
+.otable tr:last-child td{border-bottom:none;}
+.otable tr:hover td{background:var(--bg3);}
+.pill{display:inline-block;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:600;}
+.pok{background:rgba(16,185,129,0.1);color:#059669;}.pwarn{background:rgba(245,158,11,0.1);color:#d97706;}.pblock{background:rgba(239,68,68,0.1);color:#dc2626;}
+canvas{display:block;width:100%;height:220px;}
+.cw{background:#1e293b;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;box-shadow:var(--shadow);}
+.img-upload-area{background:var(--bg3);border:1.5px dashed var(--border2);border-radius:var(--rs);padding:10px;cursor:pointer;transition:all .2s;margin-top:6px;}
+.img-upload-area:hover{border-color:var(--blue);background:var(--blue-dim);}
+.img-upload-hint{font-size:11px;color:var(--text3);text-align:center;padding:4px 0;font-weight:500;}
+.img-preview-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.img-thumb-wrap{position:relative;width:66px;height:66px;}
+.img-thumb-wrap img{width:66px;height:66px;object-fit:cover;border-radius:6px;border:1px solid var(--border);box-shadow:var(--shadow);}
+.img-thumb-del{position:absolute;top:-5px;right:-5px;width:17px;height:17px;background:var(--red);border:none;border-radius:50%;color:#fff;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.2);}
+.export-row{display:flex;gap:8px;margin-top:10px;}
+.export-row button{flex:1;padding:9px;font-size:12px;font-weight:600;border-radius:var(--rs);cursor:pointer;border:1.5px solid var(--border2);background:var(--bg2);color:var(--text);transition:all .2s;box-shadow:var(--shadow);}
+.export-row button:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-dim);}
+.hbtn{display:flex;align-items:center;gap:5px;background:var(--bg2);border:1.5px solid var(--border2);border-radius:var(--rs);color:var(--text2);font-size:11px;font-weight:600;padding:6px 12px;cursor:pointer;transition:all .2s;white-space:nowrap;box-shadow:var(--shadow);}
+.hbtn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-dim);}
+.hbtn.green:hover{border-color:var(--green);color:#059669;background:var(--green-dim);}
+.hbtn svg{flex-shrink:0;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--text);border-radius:var(--rs);padding:10px 18px;font-size:13px;color:#fff;z-index:100;pointer-events:none;opacity:0;transition:opacity .3s;white-space:nowrap;box-shadow:var(--shadow-md);}
+.toast.show{opacity:1;}
+.overview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;padding:20px 18px;max-width:1000px;margin:0 auto;}
+.ov-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow);}
+.ov-card:hover{border-color:var(--blue);box-shadow:var(--shadow-md);}
+.ov-card h3{font-size:13px;font-weight:600;margin-bottom:6px;}
+.ov-card p{font-size:11px;color:var(--text2);margin-bottom:3px;}
+.ov-card .ov-status{display:inline-block;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:600;margin-top:6px;}
+.ov-table{width:100%;border-collapse:collapse;font-size:12px;background:var(--bg2);border-radius:var(--r);overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow);}
+.ov-table th{text-align:left;padding:10px 13px;background:var(--bg3);border-bottom:2px solid var(--border);color:var(--text2);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.06em;}
+.ov-table td{padding:10px 13px;border-bottom:1px solid var(--border);color:var(--text);}
+.ov-table tr:last-child td{border-bottom:none;}
+.ov-table tr:hover td{background:var(--bg3);}
+.ov-link-btn{background:var(--blue-dim);border:1px solid var(--blue-mid);color:var(--blue);border-radius:5px;padding:3px 10px;font-size:11px;cursor:pointer;font-weight:600;transition:all .2s;}
+.ov-link-btn:hover{background:var(--blue);color:#fff;}
+.ov-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+.ov-sum-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;box-shadow:var(--shadow);}
+.ov-sum-card .lbl{font-size:10px;color:var(--text2);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
+.ov-sum-card .val{font-size:22px;font-weight:700;}
+footer{text-align:center;padding:16px;color:var(--text3);font-size:11px;border-top:1px solid var(--border);background:var(--bg2);}
+@media(max-width:760px){.tab-content.active{grid-template-columns:1fr;}.badge{display:none;}.ov-summary{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+<!-- ═══ SIDEBAR ═══ -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <div class="logo">F</div>
+      <div>
+        <div class="sidebar-title">Fresnel</div>
+        <div class="sidebar-sub">P2P Radio Link</div>
+      </div>
+    </div>
+    <div class="sidebar-actions">
+      <button class="sidebar-btn save" onclick="exportProject()" title="Sačuvaj projekat">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Sačuvaj
+      </button>
+      <button class="sidebar-btn" onclick="document.getElementById('importInput').click()" title="Učitaj projekat">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Učitaj
+      </button>
+      <input type="file" id="importInput" accept=".json" style="display:none" onchange="importProject(this)">
+    </div>
+  </div>
+
+  <div class="sidebar-nav" id="sidebarNav">
+    <!-- Overview nav item -->
+    <div class="nav-item active" id="nav-overview" onclick="setActive('overview')">
+      <div class="nav-item-icon">📋</div>
+      <div class="nav-item-text">
+        <div class="nav-item-name">Opšti pregled</div>
+        <div class="nav-item-sub" id="nav-overview-sub">Pregled projekta</div>
+      </div>
+    </div>
+
+    <div class="nav-section-label" id="navSectionLabel" style="display:none;">Lokacije</div>
+    <!-- Dynamic nav items rendered by JS -->
+    <div id="navItems"></div>
+
+    <button class="nav-add-btn" onclick="addLink()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nova lokacija
+    </button>
+  </div>
+
+  <div class="sidebar-footer">
+    <div style="font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Opis dokumenta</div>
+    <input type="text" id="docDescription" value="${docDescription}" oninput="docDescription=this.value"
+      style="background:var(--bg);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);font-size:11px;padding:5px 8px;outline:none;width:100%;transition:border-color .2s;margin-bottom:10px;"
+      onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'">
+    <div style="font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Izradio</div>
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <input type="text" id="authorName" placeholder="Ime i prezime" oninput="authorName=this.value"
+        style="background:var(--bg);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);font-size:11px;padding:5px 8px;outline:none;width:100%;transition:border-color .2s;"
+        onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'">
+      <input type="text" id="authorRole" placeholder="Funkcija / titula" oninput="authorRole=this.value"
+        style="background:var(--bg);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);font-size:11px;padding:5px 8px;outline:none;width:100%;transition:border-color .2s;"
+        onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'">
+      <input type="text" id="authorEmail" placeholder="Email adresa" oninput="authorEmail=this.value"
+        style="background:var(--bg);border:1px solid var(--border2);border-radius:var(--rs);color:var(--text);font-size:11px;padding:5px 8px;outline:none;width:100%;transition:border-color .2s;"
+        onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--border2)'">
+    </div>
+    <div style="font-size:9px;color:var(--text3);margin-top:8px;">r₁ = 17.3 × √(d₁×d₂ / f×d)</div>
+  </div>
+</div>
+
+<!-- ═══ MAIN AREA ═══ -->
+<div class="main-area">
+  <!-- Top bar -->
+  <header>
+    <div id="mainHeaderTitle" style="font-size:15px;font-weight:800;letter-spacing:-.01em;text-transform:uppercase;">Opšti pregled</div>
+    <div id="mainHeaderSub" style="font-size:11px;color:var(--text2);margin-left:8px;font-weight:500;"></div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
+      <div class="badge" id="projectBadge">XPT Projekat</div>
+    </div>
+  </header>
+
+  <!-- Tab contents -->
+  <div class="tab-content active" id="tc-overview">
+    <div id="overviewContent">
+      <div style="text-align:center;padding:60px 20px;color:var(--text3);">
+        <div style="font-size:40px;margin-bottom:14px;">📡</div>
+        <div style="font-size:14px;font-weight:600;">Dodaj lokacije klikom na "Nova lokacija"</div>
+      </div>
+    </div>
+  </div>
+  <div id="tabContents"></div>
+</div>
+
+</div><!-- end app-shell -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// STATE — svaki link je zaseban objekt
+// ═══════════════════════════════════════════════════════════
+let links = [];
+let activeId = null;
+let linkCounter = 0;
+
+function newLinkData(name) {
+  const id = ++linkCounter;
+  return {
+    id,
+    name: name || 'Link ' + id,
+    nameA: '', nameB: '',
+    coordA: '', coordB: '',
+    asl1: 184, h1: 30.5,
+    asl2: 253, h2: 15.5,
+    dist: 1.024, freq: 5.8,
+    obstacles: [],
+    oid: 0,
+    terrainData: [],
+    images: { A: [], B: [], Map: [] },
+    status: 'ok', // ok | warn | danger
+    statusTxt: 'Izračunavanje...'
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
+// TAB MANAGEMENT
+// ═══════════════════════════════════════════════════════════
+function addLink(name) {
+  const lk = newLinkData(name);
+  links.push(lk);
+  renderTabs();
+  renderTabContent(lk);
+  setActive(lk.id);
+  renderOverview();
+}
+
+function deleteLink(id, e) {
+  e.stopPropagation();
+  if(links.length <= 1) return;
+  links = links.filter(l => l.id !== id);
+  document.getElementById('tc-'+id)?.remove();
+  if(activeId === id) setActive(links[links.length-1].id);
+  renderTabs();
+  renderOverview();
+}
+
+function setActive(id) {
+  activeId = id;
+  // Update nav items
+  document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t => { t.classList.remove('active'); t.style.display='none'; });
+
+  const navEl = document.getElementById('nav-' + id);
+  if(navEl) navEl.classList.add('active');
+
+  const tc = document.getElementById('tc-' + id);
+  if(tc) { tc.classList.add('active'); tc.style.display = 'block'; }
+
+  // Update main header
+  const titleEl = document.getElementById('mainHeaderTitle');
+  const subEl = document.getElementById('mainHeaderSub');
+  if(id === 'overview') {
+    if(titleEl) titleEl.textContent = projectName;
+    if(subEl) subEl.textContent = links.length ? `${links.length} lokacija` : '';
+    renderOverview();
+  } else {
+    const lk = links.find(l=>l.id===id);
+    if(lk) {
+      if(titleEl) titleEl.textContent = lk.name;
+      if(subEl) subEl.textContent = lk.nameA && lk.nameB ? `${lk.nameA} → ${lk.nameB}` : '';
+    }
+  }
+}
+
+function renderTabs() {
+  const navItems = document.getElementById('navItems');
+  const sectionLabel = document.getElementById('navSectionLabel');
+  if(!navItems) return;
+
+  sectionLabel.style.display = links.length ? 'block' : 'none';
+  navItems.innerHTML = '';
+
+  links.forEach((lk, i) => {
+    const sc = lk.status==='ok'?'var(--green)':lk.status==='warn'?'var(--amber)':'var(--red)';
+    const div = document.createElement('div');
+    div.className = 'nav-item' + (lk.id === activeId ? ' active' : '');
+    div.id = 'nav-' + lk.id;
+    div.onclick = () => setActive(lk.id);
+    div.innerHTML = `
+      <div class="nav-item-icon">${i+1}</div>
+      <div class="nav-item-text">
+        <div class="nav-item-name">${lk.name}</div>
+        <div class="nav-item-sub">${lk.nameA||'Obj.1'} → ${lk.nameB||'Obj.2'}</div>
+      </div>
+      <span class="nav-status-dot" style="background:${sc}"></span>
+      ${links.length>1?`<button class="nav-del" onclick="deleteLink(${lk.id},event)" title="Obriši">×</button>`:''}
+    `;
+    navItems.appendChild(div);
+  });
+
+  // Update overview sub
+  const ovSub = document.getElementById('nav-overview-sub');
+  if(ovSub) ovSub.textContent = links.length ? `${links.length} lokacija` : 'Pregled projekta';
+}
+
+function updateTabStatus(lk) {
+  const navEl = document.getElementById('nav-' + lk.id);
+  if(!navEl) return;
+  const dot = navEl.querySelector('.nav-status-dot');
+  const nameEl = navEl.querySelector('.nav-item-name');
+  const subEl = navEl.querySelector('.nav-item-sub');
+  const sc = lk.status==='ok'?'var(--green)':lk.status==='warn'?'var(--amber)':'var(--red)';
+  if(dot) dot.style.background = sc;
+  if(nameEl) nameEl.textContent = lk.name;
+  if(subEl) subEl.textContent = `${lk.nameA||'Obj.1'} → ${lk.nameB||'Obj.2'}`;
+  // Also update main header if this is active
+  if(activeId === lk.id) {
+    const titleEl = document.getElementById('mainHeaderTitle');
+    const hsubEl = document.getElementById('mainHeaderSub');
+    if(titleEl) titleEl.textContent = lk.name;
+    if(hsubEl) hsubEl.textContent = lk.nameA && lk.nameB ? `${lk.nameA} → ${lk.nameB}` : '';
+  }
+  // Update overview sub count
+  const ovSub = document.getElementById('nav-overview-sub');
+  if(ovSub) ovSub.textContent = `${links.length} lokacija`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER TAB CONTENT
+// ═══════════════════════════════════════════════════════════
+function renderTabContent(lk) {
+  const id = lk.id;
+  const el = document.createElement('div');
+  el.className = 'tab-content';
+  el.id = 'tc-' + id;
+  el.innerHTML = `<div class="tc-inner">
+<!-- LEFT -->
+<div class="left-col">
+
+  <!-- Naziv lokacije -->
+  <div class="panel">
+    <div class="ph"><div class="dot dot-blue"></div>Naziv lokacije</div>
+    <div class="pb">
+      <input type="text" id="linkName-${id}" value="${lk.name}" placeholder="npr. Stanari → Zelenkovići" oninput="lk${id}.name=this.value;updateTabStatus(lk${id});renderOverview()">
+    </div>
+  </div>
+
+  <!-- Objekt 1 -->
+  <div class="panel">
+    <div class="ph"><div class="dot dot-blue"></div>Objekt 1</div>
+    <div class="pb">
+      <div class="field">
+        <div class="fl"><span>Naziv objekta 1</span></div>
+        <input type="text" id="nameA-${id}" value="${lk.nameA}" placeholder="npr. Stanari — Repetitor" oninput="lk${id}.nameA=this.value;renderOverview()">
+      </div>
+      <div class="coord-box" style="margin-top:9px">
+        <div class="coord-lbl">Koordinate (Google Maps / Earth)</div>
+        <div class="coord-row">
+          <input type="text" id="coordA-${id}" value="${lk.coordA}" placeholder='44°45\'03.50"N 17°50\'18.56"E'
+            onblur="getLink(${id}).coordA=this.value;updateDistFromCoords(${id})">
+          <button class="cbtn" onclick="fetchElev(${id},'A')">Dohvati</button>
+        </div>
+        <div class="cst" id="stA-${id}"></div>
+      </div>
+      <div class="field">
+        <div class="fl"><span>Nadmorska visina (m)</span></div>
+        <div class="field-row">
+          <input type="range" id="asl1-${id}" min="0" max="2000" step="1" value="${lk.asl1}" oninput="lk${id}.asl1=+this.value;syncNI('asl1',${id},this.value);calcLink(${id})">
+          <input type="number" id="asl1n-${id}" min="0" max="2000" step="1" value="${lk.asl1}" oninput="lk${id}.asl1=+this.value;syncSL('asl1',${id},this.value);calcLink(${id})">
+        </div>
+      </div>
+      <div class="field">
+        <div class="fl"><span>Visina antene iznad tla (m)</span></div>
+        <div class="field-row">
+          <input type="range" id="h1-${id}" min="1" max="100" step="0.5" value="${lk.h1}" oninput="lk${id}.h1=+this.value;syncNI('h1',${id},this.value);calcLink(${id})">
+          <input type="number" id="h1n-${id}" min="1" max="100" step="0.5" value="${lk.h1}" oninput="lk${id}.h1=+this.value;syncSL('h1',${id},this.value);calcLink(${id})">
+        </div>
+      </div>
+      <div class="field" style="margin-top:9px">
+        <div class="fl"><span>Slike lokacije A</span><span style="font-size:10px;color:var(--text3)">max 4</span></div>
+        <div class="img-upload-area" id="imgAreaA-${id}" onclick="document.getElementById('imgInA-${id}').click()">
+          <div class="img-upload-hint" id="imgHintA-${id}">Klikni ili prevuci slike</div>
+          <div class="img-preview-row" id="imgPrevA-${id}"></div>
+        </div>
+        <input type="file" id="imgInA-${id}" accept="image/*" multiple style="display:none" onchange="handleImages(${id},'A',this)">
+      </div>
+    </div>
+  </div>
+
+  <!-- Objekt 2 -->
+  <div class="panel">
+    <div class="ph"><div class="dot dot-green"></div>Objekt 2</div>
+    <div class="pb">
+      <div class="field">
+        <div class="fl"><span>Naziv objekta 2</span></div>
+        <input type="text" id="nameB-${id}" value="${lk.nameB}" placeholder="npr. Zelenkovići — CPE" oninput="lk${id}.nameB=this.value;renderOverview()">
+      </div>
+      <div class="coord-box" style="margin-top:9px">
+        <div class="coord-lbl">Koordinate (Google Maps / Earth)</div>
+        <div class="coord-row">
+          <input type="text" id="coordB-${id}" value="${lk.coordB}" placeholder='44°44\'00.00"N 17°50\'00.00"E'
+            onblur="getLink(${id}).coordB=this.value;updateDistFromCoords(${id})">
+          <button class="cbtn" onclick="fetchElev(${id},'B')">Dohvati</button>
+        </div>
+        <div class="cst" id="stB-${id}"></div>
+      </div>
+      <div class="field">
+        <div class="fl"><span>Nadmorska visina (m)</span></div>
+        <div class="field-row">
+          <input type="range" id="asl2-${id}" min="0" max="2000" step="1" value="${lk.asl2}" oninput="lk${id}.asl2=+this.value;syncNI('asl2',${id},this.value);calcLink(${id})">
+          <input type="number" id="asl2n-${id}" min="0" max="2000" step="1" value="${lk.asl2}" oninput="lk${id}.asl2=+this.value;syncSL('asl2',${id},this.value);calcLink(${id})">
+        </div>
+      </div>
+      <div class="field">
+        <div class="fl"><span>Visina antene iznad tla (m)</span></div>
+        <div class="field-row">
+          <input type="range" id="h2-${id}" min="1" max="100" step="0.5" value="${lk.h2}" oninput="lk${id}.h2=+this.value;syncNI('h2',${id},this.value);calcLink(${id})">
+          <input type="number" id="h2n-${id}" min="1" max="100" step="0.5" value="${lk.h2}" oninput="lk${id}.h2=+this.value;syncSL('h2',${id},this.value);calcLink(${id})">
+        </div>
+      </div>
+      <div class="field" style="margin-top:9px">
+        <div class="fl"><span>Slike lokacije B</span><span style="font-size:10px;color:var(--text3)">max 4</span></div>
+        <div class="img-upload-area" id="imgAreaB-${id}" onclick="document.getElementById('imgInB-${id}').click()">
+          <div class="img-upload-hint" id="imgHintB-${id}">Klikni ili prevuci slike</div>
+          <div class="img-preview-row" id="imgPrevB-${id}"></div>
+        </div>
+        <input type="file" id="imgInB-${id}" accept="image/*" multiple style="display:none" onchange="handleImages(${id},'B',this)">
+      </div>
+    </div>
+  </div>
+
+  <!-- Link parametri -->
+  <div class="panel">
+    <div class="ph"><div class="dot dot-blue"></div>Parametri linka</div>
+    <div class="pb">
+      <div class="field">
+        <div class="fl"><span>Udaljenost (km)</span></div>
+        <div class="field-row">
+          <input type="range" id="dist-${id}" min="0.1" max="50" step="0.05" value="${lk.dist}" oninput="lk${id}.dist=+this.value;syncNI('dist',${id},this.value);calcLink(${id})">
+          <input type="number" id="distn-${id}" min="0.1" max="50" step="0.05" value="${lk.dist}" oninput="lk${id}.dist=+this.value;syncSL('dist',${id},this.value);calcLink(${id})">
+        </div>
+      </div>
+      <div class="field">
+        <div class="fl"><span>Frekvencija (GHz)</span></div>
+        <div class="field-row">
+          <input type="range" id="freq-${id}" min="1" max="60" step="0.1" value="${lk.freq}" oninput="lk${id}.freq=+this.value;syncNI('freq',${id},this.value);calcLink(${id})">
+          <input type="number" id="freqn-${id}" min="1" max="60" step="0.1" value="${lk.freq}" oninput="lk${id}.freq=+this.value;syncSL('freq',${id},this.value);calcLink(${id})">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prepreke -->
+  <div class="panel">
+    <div class="ph"><div class="dot dot-amber"></div>Prepreke<span style="margin-left:auto;font-size:10px;color:var(--text3)" id="obsCnt-${id}">0/5</span></div>
+    <div class="pb">
+      <div class="obs-list" id="obsList-${id}"></div>
+      <button class="add-btn" onclick="addObs(${id})">+ Dodaj prepreku</button>
+    </div>
+  </div>
+
+  <!-- Sken terena -->
+  <div class="panel">
+    <div class="ph"><div class="dot dot-red"></div>Auto-skeniranje terena (SRTM)</div>
+    <div class="pb">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:9px;">Dohvata visine terena duž cijele trase i pronalazi kritične prepreke u Fresnelovoj zoni.</div>
+      <button class="cbtn" id="scanBtn-${id}" onclick="scanTerrain(${id})" style="width:100%;padding:8px;font-size:12px;">Skeniraj teren</button>
+      <div class="cst" id="scanSt-${id}" style="margin-top:7px;"></div>
+      <div id="scanRes-${id}" style="display:none;margin-top:9px;"></div>
+    </div>
+  </div>
+
+</div><!-- end left-col -->
+
+<!-- RIGHT -->
+<div>
+  <div class="results">
+    <div class="rc"><div class="rlbl">Antena A — apsolutno</div><div class="rval blue" id="abs1-${id}">—</div></div>
+    <div class="rc"><div class="rlbl">Antena B — apsolutno</div><div class="rval blue" id="abs2-${id}">—</div></div>
+    <div class="rc"><div class="rlbl">F1 poluprecnik (sredina)</div><div class="rval" id="r1-${id}">—</div></div>
+    <div class="rc"><div class="rlbl">60% F1 — minimum</div><div class="rval" id="r60-${id}">—</div></div>
+    <div class="rc"><div class="rlbl">Tilt A→B</div><div class="rval" id="tilt-${id}">—</div></div>
+    <div class="rc"><div class="rlbl">Prepreke</div><div class="rval" id="obsTotal-${id}">0</div></div>
+  </div>
+  <div class="sb sb-ok" id="sbox-${id}"><span id="stxt-${id}">Izračunavanje...</span></div>
+  <div id="otWrap-${id}" style="display:none;margin-bottom:12px;">
+    <table class="otable">
+      <thead><tr><th>#</th><th>Naziv</th><th>Visina</th><th>Od Obj. 1</th><th>LOS</th><th>Clearance</th><th>Status</th></tr></thead>
+      <tbody id="otBody-${id}"></tbody>
+    </table>
+  </div>
+  <div class="cw"><canvas id="canvas-${id}"></canvas></div>
+  <div style="background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.25);border-radius:var(--rs);padding:7px 11px;margin-top:7px;display:flex;align-items:flex-start;gap:7px;">
+    <span style="font-size:13px;flex-shrink:0;margin-top:1px;">⚠</span>
+    <p style="font-size:10px;color:var(--text2);line-height:1.5;margin:0;"><b style="color:#d97706;">Napomena:</b> Za skeniranje terena korišten je <b>SRTM (Open-Meteo)</b> servis baziran na satelitskim podacima. Može doći do odstupanja u odnosu na realne terenske uvjete zbog ažuriranosti podataka, gustoće vegetacije i lokalnih promjena terena. Preporučuje se terenska provjera kritičnih tačaka.</p>
+  </div>
+
+
+  <!-- Slika karte linka -->
+  <div class="panel" style="margin-top:10px;">
+    <div class="ph">
+      <div class="dot" style="background:var(--teal)"></div>Karta linka
+      <span style="font-size:10px;color:var(--text3);margin-left:auto;">max 2 slike</span>
+    </div>
+    <div class="pb">
+      <div class="img-upload-area" id="imgAreaMap-${id}" onclick="document.getElementById('imgInMap-${id}').click()">
+        <div class="img-upload-hint" id="imgHintMap-${id}">Klikni ili prevuci sliku karte (screenshot, Google Maps...)</div>
+        <div class="img-preview-row" id="imgPrevMap-${id}"></div>
+      </div>
+      <input type="file" id="imgInMap-${id}" accept="image/*" multiple style="display:none" onchange="handleImages(${id},'Map',this)">
+    </div>
+  </div>
+
+  <div class="export-row">
+    <button onclick="genReport(${id})">📄 PDF izvještaj</button>
+    <button onclick="genWord(${id})">📝 Word izvještaj</button>
+  </div>
+</div>
+</div><!-- end tc-inner -->`;
+  document.getElementById('tabContents').appendChild(el);
+
+  // Expose link object globally so inline handlers can reference it
+  window['lk'+id] = lk;
+
+  // Drag & drop za slike
+  ['A','B','Map'].forEach(side => {
+    const area = document.getElementById('imgArea'+side+'-'+id);
+    if(!area) return;
+    area.addEventListener('dragover', e=>{e.preventDefault();area.style.borderColor='var(--blue)';});
+    area.addEventListener('dragleave', ()=>{area.style.borderColor='';});
+    area.addEventListener('drop', e=>{
+      e.preventDefault();area.style.borderColor='';
+      const files=Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/'));
+      const cur=lk.images[side];
+      const maxImg = side==='Map'?2:4;
+      files.slice(0,maxImg-cur.length).forEach(file=>{
+        const r=new FileReader();
+        r.onload=ev=>{cur.push({name:file.name,dataUrl:ev.target.result});renderPreviews(id,side);};
+        r.readAsDataURL(file);
+      });
+    });
+  });
+
+  calcLink(id);
+}
+
+// ═══════════════════════════════════════════════════════════
+// SYNC helpers
+// ═══════════════════════════════════════════════════════════
+// ── Autor ─────────────────────────────────────────────────────
+let authorName  = '';
+let authorRole  = '';
+let authorEmail = '';
+let docDescription = '${docDescription}';
+
+function getAuthorBlockHtml(){
+  if(!authorName && !authorRole && !authorEmail) return '';
+  return `<div style="margin-top:20px;padding:12px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;display:flex;align-items:center;gap:14px;">
+    <div>
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;margin-bottom:3px;">Fotodokumentaciju izradio</div>
+      ${authorName?`<div style="font-size:13px;font-weight:700;color:#1e293b;">${authorName}</div>`:''}
+      ${authorRole?`<div style="font-size:11px;color:#64748b;">${authorRole}</div>`:''}
+      ${authorEmail?`<div style="font-size:11px;color:#3b82f6;">${authorEmail}</div>`:''}
+    </div>
+  </div>`;
+}
+
+function getAuthorBlockWord(){
+  if(!authorName && !authorRole && !authorEmail) return '';
+  let b='';
+  b+=`<w:tbl><w:tblPr><w:tblW w:w="9638" w:type="dxa"/>
+    <w:tblBorders><w:top w:val="single" w:sz="4" w:color="E2E8F0"/><w:left w:val="single" w:sz="4" w:color="E2E8F0"/><w:bottom w:val="single" w:sz="4" w:color="E2E8F0"/><w:right w:val="single" w:sz="4" w:color="E2E8F0"/></w:tblBorders>
+    <w:tblCellMar><w:top w:w="100" w:type="dxa"/><w:left w:w="140" w:type="dxa"/><w:bottom w:w="100" w:type="dxa"/><w:right w:w="140" w:type="dxa"/></w:tblCellMar>
+  </w:tblPr><w:tblGrid><w:gridCol w:w="9638"/></w:tblGrid>
+  <w:tr><w:tc><w:tcPr><w:tcW w:w="9638" w:type="dxa"/><w:shd w:val="clear" w:color="auto" w:fill="F8FAFC"/></w:tcPr>
+    <w:p><w:pPr><w:spacing w:before="40" w:after="20"/></w:pPr>
+    <w:r><w:rPr><w:b/><w:sz w:val="16"/><w:color w:val="94A3B8"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr>
+    <w:t>FOTODOKUMENTACIJU IZRADIO</w:t></w:r></w:p>
+    ${authorName?`<w:p><w:pPr><w:spacing w:before="20" w:after="20"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="24"/><w:color w:val="1E293B"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr><w:t>${authorName}</w:t></w:r></w:p>`:''}
+    ${authorRole?`<w:p><w:pPr><w:spacing w:before="20" w:after="20"/></w:pPr><w:r><w:rPr><w:sz w:val="20"/><w:color w:val="64748B"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr><w:t>${authorRole}</w:t></w:r></w:p>`:''}
+    ${authorEmail?`<w:p><w:pPr><w:spacing w:before="20" w:after="40"/></w:pPr><w:r><w:rPr><w:sz w:val="20"/><w:color w:val="3B82F6"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr><w:t>${authorEmail}</w:t></w:r></w:p>`:''}
+  </w:tc></w:tr></w:tbl>`;
+  return b;
+}
+
+// ── Uvodni list (cover page) ─────────────────────────────────
+function getCoverPageHtml(linksList, now){
+  const author = (authorName||authorRole||authorEmail) ? `
+    <div style="padding:16px 20px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:28px;">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:10px;">Fotodokumentaciju izradio</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+        <div><div style="font-size:9px;color:#94a3b8;font-weight:600;text-transform:uppercase;margin-bottom:3px;">Ime i prezime</div><div style="font-size:13px;font-weight:700;color:#1e293b;">${authorName||'—'}</div></div>
+        <div><div style="font-size:9px;color:#94a3b8;font-weight:600;text-transform:uppercase;margin-bottom:3px;">Funkcija</div><div style="font-size:13px;font-weight:700;color:#1e293b;">${authorRole||'—'}</div></div>
+        <div><div style="font-size:9px;color:#94a3b8;font-weight:600;text-transform:uppercase;margin-bottom:3px;">Email</div><div style="font-size:13px;font-weight:700;color:#3b82f6;">${authorEmail||'—'}</div></div>
+      </div>
+    </div>` : '';
+
+  return `
+    <div style="min-height:calc(100vh - 80px);display:flex;flex-direction:column;justify-content:space-between;padding:40px 0 20px;">
+      <div>
+        <!-- Zaglavlje -->
+        <div style="border-bottom:4px solid #3b82f6;padding-bottom:20px;margin-bottom:32px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#3b82f6;margin-bottom:8px;">Tehnička dokumentacija</div>
+          <div style="font-size:32px;font-weight:900;color:#1e293b;letter-spacing:-.02em;line-height:1.1;">${projectName}</div>
+          <div style="font-size:16px;color:#64748b;margin-top:8px;font-weight:500;">${docDescription}</div>
+        </div>
+
+        <!-- Meta podaci -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:32px;">
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;">
+            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:4px;">Datum izrade</div>
+            <div style="font-size:14px;font-weight:700;color:#1e293b;">${now.split(',')[0]}</div>
+          </div>
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;">
+            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:4px;">Broj lokacija</div>
+            <div style="font-size:14px;font-weight:700;color:#3b82f6;">${linksList.length}</div>
+          </div>
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:14px 16px;">
+            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:4px;">Verzija</div>
+            <div style="font-size:14px;font-weight:700;color:#1e293b;">1.0</div>
+          </div>
+        </div>
+
+        <!-- Predmet dokumenta -->
+        <div style="margin-bottom:28px;">
+          <p style="font-size:12px;color:#475569;line-height:1.8;">
+            <b style="color:#1e293b;">Predmet dokumenta:</b>
+            Ovaj dokument sadrži fotodokumentaciju i tehničku analizu optičke vidljivosti P2P (point-to-point) radio linkova za projekat <b>${projectName}</b>.
+            Za svaku lokaciju prikazani su podaci o objektima, koordinatama, nadmorskim visinama, Fresnelovoj zoni, pregledu terena te fotodokumentacija sa terena.
+          </p>
+        </div>
+
+        ${author}
+      </div>
+
+      <!-- Potpis i pečat — na dnu stranice -->
+      <div style="margin-top:auto;padding-top:32px;display:grid;grid-template-columns:1fr 1fr;gap:40px;">
+        <div>
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:6px;">Potpis</div>
+          <div style="border-bottom:1.5px solid #cbd5e1;height:44px;"></div>
+          <div style="font-size:10px;color:#94a3b8;margin-top:4px;">${authorName||'Odgovorna osoba'}</div>
+        </div>
+        <div>
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;margin-bottom:6px;">Pečat</div>
+          <div style="border:1.5px dashed #cbd5e1;height:64px;border-radius:6px;"></div>
+        </div>
+      </div>
+    </div>
+    <div style="page-break-after:always;"></div>`;
+}
+
+function getCoverPageWord(linksList, now){
+  let b='';
+
+  // Naslov
+  b+=`<w:p><w:pPr><w:spacing w:before="400" w:after="80"/></w:pPr>
+    <w:r><w:rPr><w:sz w:val="18"/><w:color w:val="3B82F6"/><w:b/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr>
+    <w:t>TEHNIČKA DOKUMENTACIJA</w:t></w:r></w:p>`;
+
+  b+=`<w:p><w:pPr><w:spacing w:before="80" w:after="60"/>
+    <w:pBdr><w:bottom w:val="single" w:sz="8" w:color="3B82F6"/></w:pBdr></w:pPr>
+    <w:r><w:rPr><w:b/><w:sz w:val="48"/><w:color w:val="1E293B"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr>
+    <w:t>${projectName}</w:t></w:r></w:p>`;
+
+  b+=wPara('${docDescription}',{sz:22,color:'64748B',spAfter:200});
+
+  // Meta grid
+  b+=`<w:tbl><w:tblPr><w:tblW w:w="9638" w:type="dxa"/>
+    <w:tblBorders><w:insideH w:val="none"/><w:insideV w:val="none"/><w:top w:val="none"/><w:bottom w:val="none"/><w:left w:val="none"/><w:right w:val="none"/></w:tblBorders>
+  </w:tblPr><w:tblGrid><w:gridCol w:w="3213"/><w:gridCol w:w="3213"/><w:gridCol w:w="3212"/></w:tblGrid>
+  <w:tr>${[
+    ['Datum izrade', now.split(',')[0]],
+    ['Broj lokacija', linksList.length+''],
+    ['Verzija', '1.0']
+  ].map(([l,v])=>`<w:tc><w:tcPr><w:tcW w:w="3213" w:type="dxa"/>
+    <w:tcBorders><w:top w:val="single" w:sz="4" w:color="E2E8F0"/><w:left w:val="single" w:sz="4" w:color="E2E8F0"/><w:bottom w:val="single" w:sz="4" w:color="E2E8F0"/><w:right w:val="single" w:sz="4" w:color="E2E8F0"/></w:tcBorders>
+    <w:shd w:val="clear" w:color="auto" w:fill="F8FAFC"/>
+    <w:tcMar><w:top w:w="100" w:type="dxa"/><w:left w:w="140" w:type="dxa"/><w:bottom w:w="100" w:type="dxa"/><w:right w:w="140" w:type="dxa"/></w:tcMar></w:tcPr>
+    <w:p><w:r><w:rPr><w:b/><w:sz w:val="16"/><w:color w:val="94A3B8"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr><w:t>${l.toUpperCase()}</w:t></w:r></w:p>
+    <w:p><w:r><w:rPr><w:b/><w:sz w:val="24"/><w:color w:val="1E293B"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr><w:t>${v}</w:t></w:r></w:p>
+  </w:tc>`).join('')}</w:tr></w:tbl>`;
+
+  b+=wPara('',{spAfter:160});
+
+  // Predmet dokumenta — inline bold label + tekst
+  b+=`<w:p><w:pPr><w:spacing w:before="0" w:after="160"/></w:pPr>
+    <w:r><w:rPr><w:b/><w:sz w:val="20"/><w:color w:val="1E293B"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr><w:t xml:space="preserve">Predmet dokumenta: </w:t></w:r>
+    <w:r><w:rPr><w:sz w:val="20"/><w:color w:val="475569"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr>
+    <w:t xml:space="preserve">Ovaj dokument sadrži fotodokumentaciju i tehničku analizu optičke vidljivosti P2P (point-to-point) radio linkova za projekat ${projectName}. Za svaku lokaciju prikazani su podaci o objektima, koordinatama, nadmorskim visinama, Fresnelovoj zoni, pregledu terena te fotodokumentacija sa terena.</w:t></w:r></w:p>`;
+
+  // Autor
+  if(authorName||authorRole||authorEmail){
+    b+=`<w:tbl><w:tblPr><w:tblW w:w="9638" w:type="dxa"/>
+      <w:tblBorders><w:insideH w:val="none"/><w:insideV w:val="none"/><w:top w:val="none"/><w:bottom w:val="none"/><w:left w:val="none"/><w:right w:val="none"/></w:tblBorders>
+    </w:tblPr><w:tblGrid><w:gridCol w:w="3213"/><w:gridCol w:w="3213"/><w:gridCol w:w="3212"/></w:tblGrid>
+    <w:tr>${[
+      ['Ime i prezime', authorName||'—', '1E293B'],
+      ['Funkcija', authorRole||'—', '1E293B'],
+      ['Email', authorEmail||'—', '3B82F6']
+    ].map(([l,v,vc])=>`<w:tc><w:tcPr><w:tcW w:w="3213" w:type="dxa"/>
+      <w:tcBorders><w:top w:val="single" w:sz="4" w:color="E2E8F0"/><w:left w:val="single" w:sz="4" w:color="E2E8F0"/><w:bottom w:val="single" w:sz="4" w:color="E2E8F0"/><w:right w:val="single" w:sz="4" w:color="E2E8F0"/></w:tcBorders>
+      <w:shd w:val="clear" w:color="auto" w:fill="F8FAFC"/>
+      <w:tcMar><w:top w:w="100" w:type="dxa"/><w:left w:w="140" w:type="dxa"/><w:bottom w:w="100" w:type="dxa"/><w:right w:w="140" w:type="dxa"/></w:tcMar></w:tcPr>
+      <w:p><w:r><w:rPr><w:b/><w:sz w:val="16"/><w:color w:val="94A3B8"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr><w:t>${l.toUpperCase()}</w:t></w:r></w:p>
+      <w:p><w:r><w:rPr><w:b/><w:sz w:val="22"/><w:color w:val="${vc}"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr><w:t>${v}</w:t></w:r></w:p>
+    </w:tc>`).join('')}</w:tr></w:tbl>`;
+    b+=wPara('',{spAfter:80});
+  }
+
+  // Potpis i pečat — na dnu prve stranice
+  b+=wPara('',{spBefore:600,spAfter:0});
+  b+=`<w:tbl><w:tblPr><w:tblW w:w="9638" w:type="dxa"/>
+    <w:tblBorders><w:insideH w:val="none"/><w:insideV w:val="none"/><w:top w:val="none"/><w:bottom w:val="none"/><w:left w:val="none"/><w:right w:val="none"/></w:tblBorders>
+  </w:tblPr><w:tblGrid><w:gridCol w:w="4619"/><w:gridCol w:w="5019"/></w:tblGrid>
+  <w:tr>
+    <w:tc><w:tcPr><w:tcW w:w="4619" w:type="dxa"/><w:tcBorders><w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/></w:tcBorders></w:tcPr>
+      <w:p><w:r><w:rPr><w:b/><w:sz w:val="16"/><w:color w:val="94A3B8"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr><w:t>POTPIS</w:t></w:r></w:p>
+      <w:p><w:pPr><w:spacing w:before="500" w:after="40"/><w:pBdr><w:bottom w:val="single" w:sz="6" w:color="CBD5E1"/></w:pBdr></w:pPr><w:r><w:t> </w:t></w:r></w:p>
+      <w:p><w:r><w:rPr><w:sz w:val="18"/><w:color w:val="94A3B8"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr><w:t>${authorName||'Odgovorna osoba'}</w:t></w:r></w:p>
+    </w:tc>
+    <w:tc><w:tcPr><w:tcW w:w="5019" w:type="dxa"/><w:tcBorders><w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/></w:tcBorders></w:tcPr>
+      <w:p><w:r><w:rPr><w:b/><w:sz w:val="16"/><w:color w:val="94A3B8"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr><w:t>PEČAT</w:t></w:r></w:p>
+      <w:p><w:pPr><w:spacing w:before="40" w:after="0"/><w:pBdr><w:top w:val="dashed" w:sz="6" w:color="CBD5E1"/><w:left w:val="dashed" w:sz="6" w:color="CBD5E1"/><w:bottom w:val="dashed" w:sz="6" w:color="CBD5E1"/><w:right w:val="dashed" w:sz="6" w:color="CBD5E1"/></w:pBdr></w:pPr><w:r><w:rPr><w:sz w:val="28"/></w:rPr><w:t xml:space="preserve">   </w:t></w:r></w:p>
+      <w:p><w:pPr><w:spacing w:before="0" w:after="0"/><w:pBdr><w:left w:val="dashed" w:sz="6" w:color="CBD5E1"/><w:bottom w:val="dashed" w:sz="6" w:color="CBD5E1"/><w:right w:val="dashed" w:sz="6" w:color="CBD5E1"/></w:pBdr></w:pPr><w:r><w:rPr><w:sz w:val="40"/></w:rPr><w:t xml:space="preserve">   </w:t></w:r></w:p>
+      <w:p><w:pPr><w:spacing w:before="0" w:after="0"/><w:pBdr><w:left w:val="dashed" w:sz="6" w:color="CBD5E1"/><w:bottom w:val="dashed" w:sz="6" w:color="CBD5E1"/><w:right w:val="dashed" w:sz="6" w:color="CBD5E1"/></w:pBdr></w:pPr><w:r><w:rPr><w:sz w:val="40"/></w:rPr><w:t xml:space="preserve">   </w:t></w:r></w:p>
+    </w:tc>
+  </w:tr></w:tbl>`;
+
+  b+=wPageBreak();
+  return b;
+}
+// ── Toast ────────────────────────────────────────────────────
+function showToast(msg, color){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.className='toast';document.body.appendChild(t);}
+  t.textContent=msg;
+  if(color) t.style.color=color; else t.style.color='#fff';
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+function syncNI(field, id, val) {
+  const el = document.getElementById(field+'n-'+id);
+  if(el) el.value = val;
+}
+function syncSL(field, id, val) {
+  const sl = document.getElementById(field+'-'+id);
+  if(sl){ const v=Math.min(Math.max(+val,+sl.min),+sl.max); sl.value=v; }
+}
+
+// ═══════════════════════════════════════════════════════════
+// IMAGES
+// ═══════════════════════════════════════════════════════════
+function handleImages(id, side, input) {
+  const lk = links.find(l=>l.id===id);
+  if(!lk.images[side]) lk.images[side]=[];
+  const maxImg = side==='Map'?2:4;
+  const files = Array.from(input.files);
+  const cur = lk.images[side];
+  files.slice(0,maxImg-cur.length).forEach(file=>{
+    const r=new FileReader();
+    r.onload=e=>{cur.push({name:file.name,dataUrl:e.target.result});renderPreviews(id,side);};
+    r.readAsDataURL(file);
+  });
+  input.value='';
+}
+function renderPreviews(id, side) {
+  const lk = links.find(l=>l.id===id);
+  if(!lk.images[side]) return;
+  const row  = document.getElementById('imgPrev'+side+'-'+id);
+  const hint = document.getElementById('imgHint'+side+'-'+id);
+  if(!row) return;
+  const maxImg = side==='Map'?2:4;
+  row.innerHTML = lk.images[side].map((img,i)=>`
+    <div class="img-thumb-wrap">
+      <img src="${img.dataUrl}">
+      <button class="img-thumb-del" onclick="delImg(${id},'${side}',${i});event.stopPropagation()">×</button>
+    </div>`).join('');
+  if(hint) hint.style.display = lk.images[side].length>=maxImg?'none':'block';
+}
+function delImg(id, side, idx) {
+  const lk = links.find(l=>l.id===id);
+  lk.images[side].splice(idx,1);
+  renderPreviews(id,side);
+}
+
+// ═══════════════════════════════════════════════════════════
+// KOORDINATE & ELEVATION
+// ═══════════════════════════════════════════════════════════
+function parseDMS(s) {
+  s=s.trim().replace(/\s+/g,' ');
+  const dec=s.match(/^(-?\d+\.?\d*)[,\s]+(-?\d+\.?\d*)$/);
+  if(dec) return {lat:+dec[1],lon:+dec[2]};
+  const dms=s.match(/(\d+)[°d\s](\d+)['\u2019\u2018\s](\d+\.?\d*)[""\u201C\u201D\s]?([NS])[,\s]+(\d+)[°d\s](\d+)['\u2019\u2018\s](\d+\.?\d*)[""\u201C\u201D\s]?([EW])/i);
+  if(dms){
+    let lat=+dms[1]+(+dms[2])/60+(+dms[3])/3600;
+    let lon=+dms[5]+(+dms[6])/60+(+dms[7])/3600;
+    if(/S/i.test(dms[4]))lat=-lat;
+    if(/W/i.test(dms[8]))lon=-lon;
+    return{lat,lon};
+  }
+  return null;
+}
+async function getElev(lat,lon){
+  const lat6=lat.toFixed(6), lon6=lon.toFixed(6);
+
+  // 1. Open-Meteo elevation endpoint
+  try{
+    const r=await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lat6}&longitude=${lon6}`);
+    if(r.ok){const d=await r.json();if(Array.isArray(d.elevation)&&d.elevation[0]!==null)return d.elevation[0];}
+  }catch(e){}
+
+  // 2. Open-Meteo forecast endpoint (elevation je uvijek u odgovoru)
+  try{
+    const r=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat6}&longitude=${lon6}&hourly=temperature_2m&forecast_days=1`);
+    if(r.ok){const d=await r.json();if(d.elevation!=null)return d.elevation;}
+  }catch(e){}
+
+  // 3. OpenTopoData SRTM90
+  try{
+    const r=await fetch(`https://api.opentopodata.org/v1/srtm90m?locations=${lat6},${lon6}`);
+    if(r.ok){const d=await r.json();if(d.results?.[0]?.elevation!=null)return d.results[0].elevation;}
+  }catch(e){}
+
+  // 4. CORS proxy → Open-Meteo
+  try{
+    const target=encodeURIComponent(`https://api.open-meteo.com/v1/elevation?latitude=${lat6}&longitude=${lon6}`);
+    const r=await fetch(`https://api.allorigins.win/get?url=${target}`);
+    if(r.ok){const w=await r.json();const d=JSON.parse(w.contents);if(Array.isArray(d.elevation)&&d.elevation[0]!==null)return d.elevation[0];}
+  }catch(e){}
+
+  throw new Error('Svi API-ji nedostupni — unesi visinu ručno');
+}
+// ── Haversine udaljenost (km) ────────────────────────────────
+function haversine(lat1,lon1,lat2,lon2){
+  const R=6371;
+  const dLat=(lat2-lat1)*Math.PI/180;
+  const dLon=(lon2-lon1)*Math.PI/180;
+  const a=Math.sin(dLat/2)*Math.sin(dLat/2)+
+          Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
+          Math.sin(dLon/2)*Math.sin(dLon/2);
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function updateDistFromCoords(id){
+  const lk=links.find(l=>l.id===id);
+  if(!lk.coordA||!lk.coordB) return;
+  const cA=parseDMS(lk.coordA);
+  const cB=parseDMS(lk.coordB);
+  if(!cA||!cB) return;
+  const d=haversine(cA.lat,cA.lon,cB.lat,cB.lon);
+  lk.dist=+d.toFixed(3);
+  const sl=document.getElementById('dist-'+id);
+  const ni=document.getElementById('distn-'+id);
+  if(sl){sl.value=lk.dist; syncNI('dist',id,lk.dist);}
+  if(ni) ni.value=lk.dist;
+  showToast('↔ Udaljenost A→B: '+lk.dist+' km');
+  // Ažuriraj kartu
+}
+
+async function fetchElev(id, side) {
+  const lk = links.find(l=>l.id===id);
+  const inp = document.getElementById('coord'+side+'-'+id);
+  const st  = document.getElementById('st'+side+'-'+id);
+  const coords = parseDMS(inp.value);
+  if(!coords){st.className='cst cerr';st.textContent='Neispravne koordinate — primjer: 44°45\'03.50"N 17°50\'18.56"E';return;}
+  st.className='cst cload';st.textContent='Dohvatam nadmorsku visinu...';
+  lk.terrainData=[];
+  document.getElementById('scanSt-'+id).textContent='';
+  document.getElementById('scanRes-'+id).style.display='none';
+
+  // Sačuvaj koordinate odmah
+  lk['coord'+side]=inp.value;
+
+  try{
+    const e=await getElev(coords.lat,coords.lon);
+    const field=side==='A'?'asl1':'asl2';
+    lk[field]=Math.round(e);
+    document.getElementById(field+'-'+id).value=Math.round(e);
+    syncNI(field,id,Math.round(e));
+    st.className='cst cok';
+    st.textContent='✓ '+Math.round(e)+' m  ('+coords.lat.toFixed(5)+', '+coords.lon.toFixed(5)+')';
+    // Automatski izračunaj udaljenost ako su obje koordinate dostupne
+    updateDistFromCoords(id);
+    calcLink(id);
+  }catch(err){
+    // Koordinate su sačuvane, ali visina nije dohvaćena — svejedno izračunaj udaljenost
+    updateDistFromCoords(id);
+    st.className='cst cerr';
+    st.textContent='Greška: '+err.message;
+    calcLink(id);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// OBSTACLES
+// ═══════════════════════════════════════════════════════════
+function addObs(id) {
+  const lk=links.find(l=>l.id===id);
+  if(lk.obstacles.length>=5)return;
+  const oid=++lk.oid;
+  lk.obstacles.push({id:oid,name:'Prepreka '+oid,asl:210,pos:lk.dist*0.5});
+  renderObs(id);calcLink(id);
+}
+function delObs(id,oid){
+  const lk=links.find(l=>l.id===id);
+  lk.obstacles=lk.obstacles.filter(o=>o.id!==oid);
+  renderObs(id);calcLink(id);
+}
+function renderObs(id){
+  const lk=links.find(l=>l.id===id);
+  document.getElementById('obsCnt-'+id).textContent=lk.obstacles.length+'/5';
+  const list=document.getElementById('obsList-'+id);
+  list.innerHTML='';
+  lk.obstacles.forEach((o,i)=>{
+    const d=document.createElement('div');d.className='obs-item';
+    d.innerHTML=`
+      <div class="obs-hdr">
+        <div class="obs-num">${i+1}</div>
+        <input type="text" value="${o.name}" style="background:transparent;border:none;color:var(--text);font-size:12px;font-weight:500;padding:0;width:100%;outline:none;font-family:inherit;" oninput="getLink(${id}).obstacles[${i}].name=this.value">
+        <button class="obs-del" onclick="delObs(${id},${o.id})">×</button>
+      </div>
+      <div class="coord-box" style="margin-bottom:7px;">
+        <div class="coord-lbl">Koordinate prepreke</div>
+        <div class="coord-row">
+          <input type="text" id="coordObs${o.id}-${id}" placeholder='44°44\'30"N 17°50\'10"E'>
+          <button class="cbtn" onclick="fetchElevObs(${id},${o.id},${i})">Dohvati</button>
+        </div>
+        <div class="cst" id="stObs${o.id}-${id}"></div>
+      </div>
+      <div class="obs-grid">
+        <div class="field">
+          <div class="fl"><span style="font-size:11px">Nadm. visina (m)</span></div>
+          <div class="field-row">
+            <input type="range" id="oasl${o.id}-${id}" min="0" max="2000" step="1" value="${o.asl}" oninput="getLink(${id}).obstacles[${i}].asl=+this.value;syncNI('oasl${o.id}',${id},this.value);calcLink(${id})">
+            <input type="number" id="oasl${o.id}n-${id}" min="0" max="2000" step="1" value="${o.asl}" style="width:62px" oninput="getLink(${id}).obstacles[${i}].asl=+this.value;syncSL('oasl${o.id}',${id},this.value);calcLink(${id})">
+          </div>
+        </div>
+        <div class="field">
+          <div class="fl"><span style="font-size:11px">Daljina od Obj. 1 (km)</span></div>
+          <div class="field-row">
+            <input type="range" id="opos${o.id}-${id}" min="0.01" max="${(lk.dist*0.99).toFixed(2)}" step="0.01" value="${o.pos}" oninput="getLink(${id}).obstacles[${i}].pos=+this.value;syncNI('opos${o.id}',${id},this.value);calcLink(${id})">
+            <input type="number" id="opos${o.id}n-${id}" min="0.01" max="${(lk.dist*0.99).toFixed(2)}" step="0.01" value="${o.pos.toFixed(2)}" style="width:62px" oninput="getLink(${id}).obstacles[${i}].pos=+this.value;syncSL('opos${o.id}',${id},this.value);calcLink(${id})">
+          </div>
+        </div>
+      </div>`;
+    list.appendChild(d);
+  });
+}
+function getLink(id){return links.find(l=>l.id===id);}
+async function fetchElevObs(id,oid,idx){
+  const lk=links.find(l=>l.id===id);
+  const inp=document.getElementById('coordObs'+oid+'-'+id);
+  const st=document.getElementById('stObs'+oid+'-'+id);
+  const coords=parseDMS(inp.value);
+  if(!coords){st.className='cst cerr';st.textContent='Neispravne koordinate';return;}
+  st.className='cst cload';st.textContent='Dohvatam...';
+  try{
+    const e=await getElev(coords.lat,coords.lon);
+    lk.obstacles[idx].asl=Math.round(e);
+    const sl=document.getElementById('oasl'+oid+'-'+id);
+    if(sl){sl.value=Math.round(e);syncNI('oasl'+oid,id,Math.round(e));}
+    st.className='cst cok';st.textContent='✓ '+Math.round(e)+' m';
+    calcLink(id);
+  }catch(err){st.className='cst cerr';st.textContent='Greška: '+err.message;}
+}
+
+// ═══════════════════════════════════════════════════════════
+// TERRAIN SCAN
+// ═══════════════════════════════════════════════════════════
+async function scanTerrain(id){
+  const lk=links.find(l=>l.id===id);
+  const coordA=parseDMS(document.getElementById('coordA-'+id).value);
+  const coordB=parseDMS(document.getElementById('coordB-'+id).value);
+  const st=document.getElementById('scanSt-'+id);
+  const res=document.getElementById('scanRes-'+id);
+  const btn=document.getElementById('scanBtn-'+id);
+  if(!coordA||!coordB){st.className='cst cerr';st.textContent='Unesi koordinate A i B prije skeniranja.';return;}
+  btn.disabled=true;btn.textContent='Skeniranje...';
+  st.className='cst cload';res.style.display='none';
+  const N=40;const lats=[],lons=[];
+  for(let i=0;i<=N;i++){const t=i/N;lats.push((coordA.lat+(coordB.lat-coordA.lat)*t).toFixed(6));lons.push((coordA.lon+(coordB.lon-coordA.lon)*t).toFixed(6));}
+  st.textContent='Dohvatam '+(N+1)+' tačaka...';
+  try{
+    const r=await fetch(`https://api.open-meteo.com/v1/elevation?latitude=${lats.join(',')}&longitude=${lons.join(',')}`);
+    if(!r.ok)throw new Error('API greška');
+    const d=await r.json();
+    if(!Array.isArray(d.elevation))throw new Error('Neočekivan odgovor');
+    lk.terrainData=d.elevation.map((elev,i)=>({x:(i/N)*lk.dist,y:elev}));
+    const ant1=lk.asl1+lk.h1,ant2=lk.asl2+lk.h2;
+    const critical=[];
+    lk.terrainData.forEach((pt,i)=>{
+      if(i===0||i===N)return;
+      const d1=pt.x,d2=lk.dist-pt.x;
+      const r1=17.3*Math.sqrt((d1*d2)/(lk.freq*lk.dist));
+      const los=ant1+(ant2-ant1)*(pt.x/lk.dist);
+      const clr=los-r1-pt.y;
+      if(clr/r1*100<60)critical.push({...pt,clr:clr.toFixed(1),pct:Math.round(clr/r1*100)});
+    });
+    critical.sort((a,b)=>a.clr-b.clr);
+    st.className='cst cok';st.textContent='✓ Skeniranje završeno — '+lk.terrainData.length+' tačaka, '+critical.length+' kritičnih zona';
+    if(critical.length===0){
+      res.style.display='block';
+      res.innerHTML=`<div style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);border-radius:var(--rs);padding:8px 12px;font-size:12px;color:#059669;font-weight:500;">✓ Teren slobodan — Fresnelova zona slobodna</div>`;
+    } else {
+      const rows=critical.slice(0,5).map((p,i)=>`
+        <tr><td style="color:var(--text2)">${i+1}</td><td>${p.x.toFixed(2)} km</td><td>${Math.round(p.y)} m</td>
+        <td style="color:${+p.clr<0?'var(--red)':+p.pct<60?'var(--amber)':'var(--green)'}">${p.clr} m</td>
+        <td><button class="cbtn" style="padding:2px 7px;font-size:10px;" onclick="addObsFromScan(${id},${p.x.toFixed(3)},${Math.round(p.y)},${i+1})">+ Dodaj</button></td></tr>`).join('');
+      res.style.display='block';
+      res.innerHTML=`<div style="font-size:11px;color:var(--text2);margin-bottom:5px;">Top ${Math.min(5,critical.length)} kritičnih zona:</div>
+        <table style="width:100%;border-collapse:collapse;font-size:11px;">
+          <thead><tr style="color:var(--text2)"><th style="padding:3px 6px;border-bottom:1px solid var(--border)">Br.</th><th style="padding:3px 6px;border-bottom:1px solid var(--border)">Od Obj. 1</th><th style="padding:3px 6px;border-bottom:1px solid var(--border)">Visina</th><th style="padding:3px 6px;border-bottom:1px solid var(--border)">Clearance</th><th style="padding:3px 6px;border-bottom:1px solid var(--border)"></th></tr></thead>
+          <tbody>${rows}</tbody></table>`;
+    }
+    calcLink(id);
+  }catch(e){st.className='cst cerr';st.textContent='Greška: '+e.message;}
+  btn.disabled=false;btn.textContent='Skeniraj teren';
+}
+function addObsFromScan(id,km,asl,num){
+  const lk=links.find(l=>l.id===id);
+  if(lk.obstacles.length>=5)return;
+  const oid=++lk.oid;
+  lk.obstacles.push({id:oid,name:'Prepreka '+num+' (teren)',asl,pos:km});
+  renderObs(id);calcLink(id);
+  document.getElementById('obsList-'+id).scrollIntoView({behavior:'smooth'});
+}
+
+// ═══════════════════════════════════════════════════════════
+// CALCULATION & DRAW
+// ═══════════════════════════════════════════════════════════
+function calcLink(id){
+  const lk=links.find(l=>l.id===id);
+  if(!lk)return;
+  const {asl1,h1,asl2,h2,dist,freq}=lk;
+  const ant1=asl1+h1,ant2=asl2+h2;
+  const r1mid=17.3*Math.sqrt((dist/2*dist/2)/(freq*dist));
+  const tilt=(Math.atan2(ant2-ant1,dist*1000)*180/Math.PI).toFixed(2);
+
+  // Update slajder maxove prepreka
+  lk.obstacles.forEach(o=>{
+    const sl=document.getElementById('opos'+o.id+'-'+id);
+    const ni=document.getElementById('opos'+o.id+'n-'+id);
+    const mx=(dist*0.99).toFixed(2);
+    if(sl){sl.max=mx;if(o.pos>dist*0.99){o.pos=+(dist*0.99).toFixed(2);sl.value=o.pos;if(ni)ni.value=o.pos;}}
+    if(ni)ni.max=mx;
+  });
+
+  let worst='ok';
+  const res=lk.obstacles.map(o=>{
+    const d1=Math.min(o.pos,dist*0.999),d2=dist-d1,p=d1/dist;
+    const r=17.3*Math.sqrt((d1*d2)/(freq*dist));
+    const los=ant1+(ant2-ant1)*p;
+    const clr=los-r-o.asl;
+    let s='ok';
+    if(clr<0)s='block';else if(clr<r*0.4)s='warn';
+    if(s==='block')worst='block';else if(s==='warn'&&worst!=='block')worst='warn';
+    return{...o,d1,los:los.toFixed(1),clr:clr.toFixed(1),r,s};
+  });
+
+  // Update result cards
+  const g=x=>document.getElementById(x+'-'+id);
+  g('abs1').textContent=ant1.toFixed(1)+' m';
+  g('abs2').textContent=ant2.toFixed(1)+' m';
+  g('r1').textContent=r1mid.toFixed(1)+' m';
+  g('r60').textContent=(r1mid*0.6).toFixed(1)+' m';
+  g('tilt').textContent=(tilt>=0?'+':'')+tilt+'°';
+  g('obsTotal').textContent=lk.obstacles.length;
+
+  // Status
+  lk.status=worst;
+  const sb=g('sbox'),st=g('stxt');
+  sb.className='sb';
+  if(lk.obstacles.length===0){sb.classList.add('sb-ok');st.textContent='Nema prepreka — Fresnelova zona slobodna. Tilt: '+(tilt>=0?'+':'')+tilt+'°';}
+  else if(worst==='block'){sb.classList.add('sb-danger');st.textContent='BLOKIRAN — prepreka siječe LOS liniju!';}
+  else if(worst==='warn'){sb.classList.add('sb-warn');st.textContent='Pažnja — prepreka ulazi u Fresnelovu zonu (ispod 60% F1).';}
+  else{sb.classList.add('sb-ok');st.textContent='OK — sve prepreke slobodne. Tilt: '+(tilt>=0?'+':'')+tilt+'°';}
+  lk.statusTxt=st.textContent;
+
+  // Obstacles table
+  const ow=g('otWrap');
+  ow.style.display=lk.obstacles.length?'block':'none';
+  g('otBody').innerHTML=res.map((o,i)=>`
+    <tr><td style="color:var(--text2)">${i+1}</td><td>${o.name}</td><td>${o.asl} m</td>
+    <td>${o.d1.toFixed(2)} km</td><td>${o.los} m</td>
+    <td style="color:${o.s==='block'?'var(--red)':o.s==='warn'?'var(--amber)':'var(--green)'}">${o.clr} m</td>
+    <td><span class="pill ${o.s==='block'?'pblock':o.s==='warn'?'pwarn':'pok'}">${o.s==='block'?'BLOKIRAN':o.s==='warn'?'Pažnja':'OK'}</span></td></tr>`).join('');
+
+  updateTabStatus(lk);
+  drawCanvas(id, lk, ant1, ant2, r1mid, res);
+  if(activeId==='overview') renderOverview();
+}
+
+function drawCanvas(id, lk, ant1, ant2, r1mid, res){
+  const cv=document.getElementById('canvas-'+id);
+  if(!cv)return;
+  const W=cv.offsetWidth||520,H=220;
+  cv.width=W*devicePixelRatio;cv.height=H*devicePixelRatio;
+  const ctx=cv.getContext('2d');ctx.scale(devicePixelRatio,devicePixelRatio);
+  const {asl1,asl2,dist,freq,terrainData}=lk;
+  const pad={l:52,r:18,t:16,b:34},gW=W-pad.l-pad.r,gH=H-pad.t-pad.b,N=250;
+  const frT=[],frB=[],gnd=[];
+  for(let i=0;i<=N;i++){
+    const t=i/N,x=t*dist,d1=x,d2=dist-x;
+    const r=(i===0||i===N)?0:17.3*Math.sqrt((d1*d2)/(freq*dist));
+    const los=ant1+(ant2-ant1)*t;
+    let g;
+    if(terrainData.length>1){
+      let lo=terrainData[0],hi=terrainData[terrainData.length-1];
+      for(let j=0;j<terrainData.length-1;j++){if(terrainData[j].x<=x&&terrainData[j+1].x>=x){lo=terrainData[j];hi=terrainData[j+1];break;}}
+      const span=hi.x-lo.x;g=span>0?lo.y+(hi.y-lo.y)*((x-lo.x)/span):lo.y;
+    }else{g=asl1+(asl2-asl1)*t;}
+    frT.push({x,y:los+r});frB.push({x,y:los-r});gnd.push({x,y:g});
+  }
+  const allY=[...frT.map(p=>p.y),...frB.map(p=>p.y),...gnd.map(p=>p.y)];
+  res.forEach(o=>allY.push(o.asl));
+  if(terrainData.length)terrainData.forEach(p=>allY.push(p.y));
+  const minY=Math.min(...allY)-5,maxY=Math.max(...allY)+12;
+  const sx=x=>pad.l+(x/dist)*gW,sy=y=>pad.t+gH-((y-minY)/(maxY-minY))*gH;
+  ctx.fillStyle='#1e293b';ctx.fillRect(0,0,W,H);ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle='rgba(255,255,255,0.05)';ctx.lineWidth=0.5;
+  [.25,.5,.75].forEach(t=>{const gy=sy(minY+t*(maxY-minY));ctx.beginPath();ctx.moveTo(pad.l,gy);ctx.lineTo(pad.l+gW,gy);ctx.stroke();});
+  const gpts=terrainData.length>1?terrainData:gnd;
+  ctx.beginPath();gpts.forEach((p,i)=>i===0?ctx.moveTo(sx(p.x),sy(p.y)):ctx.lineTo(sx(p.x),sy(p.y)));
+  ctx.lineTo(sx(dist),sy(minY));ctx.lineTo(sx(0),sy(minY));ctx.closePath();
+  ctx.fillStyle='rgba(100,90,70,0.22)';ctx.fill();
+  ctx.beginPath();gpts.forEach((p,i)=>i===0?ctx.moveTo(sx(p.x),sy(p.y)):ctx.lineTo(sx(p.x),sy(p.y)));
+  ctx.strokeStyle=terrainData.length>1?'rgba(180,130,80,0.7)':'rgba(150,135,100,0.4)';ctx.lineWidth=terrainData.length>1?2:1.5;ctx.stroke();
+  if(terrainData.length>1){ctx.font='10px sans-serif';ctx.fillStyle='rgba(180,130,80,0.6)';ctx.textAlign='right';ctx.fillText('SRTM teren',pad.l+gW,pad.t+gH+16);}
+  ctx.beginPath();frT.forEach((p,i)=>i===0?ctx.moveTo(sx(p.x),sy(p.y)):ctx.lineTo(sx(p.x),sy(p.y)));
+  frB.slice().reverse().forEach(p=>ctx.lineTo(sx(p.x),sy(p.y)));ctx.closePath();ctx.fillStyle='rgba(29,158,117,0.1)';ctx.fill();
+  [frT,frB].forEach(arr=>{ctx.beginPath();arr.forEach((p,i)=>i===0?ctx.moveTo(sx(p.x),sy(p.y)):ctx.lineTo(sx(p.x),sy(p.y)));ctx.strokeStyle='rgba(29,158,117,0.38)';ctx.lineWidth=1;ctx.stroke();});
+  ctx.beginPath();ctx.moveTo(sx(0),sy(ant1));ctx.lineTo(sx(dist),sy(ant2));ctx.strokeStyle='#4a9eff';ctx.lineWidth=2;ctx.stroke();
+  res.forEach((o,i)=>{
+    const ox=o.d1;
+    const col=o.s==='block'?'rgba(255,92,92,0.85)':o.s==='warn'?'rgba(245,166,35,0.75)':'rgba(245,166,35,0.35)';
+    ctx.fillStyle=col;ctx.fillRect(sx(ox)-5,sy(o.asl),10,sy(minY)-sy(o.asl));
+    ctx.fillStyle='#e8e6f0';ctx.font='10px sans-serif';ctx.textAlign='center';ctx.fillText(o.asl+'m',sx(ox),sy(o.asl)-5);
+    ctx.fillStyle=col;ctx.beginPath();ctx.arc(sx(ox),sy(o.asl)-17,7,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='bold 9px sans-serif';ctx.fillText(i+1,sx(ox),sy(o.asl)-13);
+  });
+  ctx.fillStyle='#4a9eff';
+  [{x:0,y:ant1},{x:dist,y:ant2}].forEach(p=>{ctx.beginPath();ctx.arc(sx(p.x),sy(p.y),5,0,Math.PI*2);ctx.fill();});
+  ctx.font='11px sans-serif';ctx.fillStyle='#8b89a0';
+  const nA=lk.nameA||'A',nB=lk.nameB||'B';
+  ctx.textAlign='right';ctx.fillText(nA,sx(0)-8,sy(ant1)+4);ctx.fillText(ant1.toFixed(0)+'m',sx(0)-8,sy(ant1)+16);
+  ctx.textAlign='left';ctx.fillText(nB,sx(dist)+8,sy(ant2)+4);ctx.fillText(ant2.toFixed(0)+'m',sx(dist)+8,sy(ant2)+16);
+  ctx.textAlign='right';ctx.fillStyle='rgba(139,137,160,0.5)';
+  [0,.33,.66,1].forEach(t=>{const yv=minY+t*(maxY-minY);ctx.fillText(Math.round(yv)+'m',pad.l-5,sy(yv)+4);});
+  ctx.textAlign='center';[0,.5,1].forEach(t=>{ctx.fillText((dist*t).toFixed(2)+'km',sx(dist*t),pad.t+gH+18);});
+}
+
+// ═══════════════════════════════════════════════════════════
+// REPORTS
+// ═══════════════════════════════════════════════════════════
+function getReportData(id){
+  const lk=links.find(l=>l.id===id);
+  const{ant1r,ant2r,r1midr,tiltr,obsResr}=calcData(lk);
+  const ant1=ant1r,ant2=ant2r,r1mid=r1midr,tilt=tiltr;
+  const statusCls=lk.status;
+  const statusColor=statusCls==='ok'?'#059669':statusCls==='warn'?'#d97706':'#dc2626';
+  const statusBg=statusCls==='ok'?'#ECFDF5':statusCls==='warn'?'#FFFBEB':'#FEF2F2';
+  const chartImg=document.getElementById('canvas-'+id)?.toDataURL('image/png')||'';
+  const now=new Date().toLocaleString('bs-BA');
+  const obsRows=obsResr;
+  return{lk,ant1,ant2,r1mid,tilt,statusCls,statusColor,statusBg,chartImg,now,obsRows};
+}
+
+function imgBlockHtml(lk,side,title){
+  const imgs=lk.images[side];
+  if(!imgs.length) return`<div style="padding:14px;background:#f8fafc;border:1.5px dashed #e2e8f0;border-radius:8px;color:#94a3b8;font-style:italic;font-size:12px;text-align:center;">Nema učitanih slika za ${title}</div>`;
+  const cols=imgs.length===1?1:imgs.length===2?2:imgs.length===3?3:2;
+  const imgW=cols===1?'100%':cols===2?'calc(50% - 6px)':'calc(33.33% - 6px)';
+  const imgH=cols===1?'280px':'180px';
+  return`<div style="display:flex;flex-wrap:wrap;gap:10px;">`+imgs.map((img,i)=>`
+    <div style="width:${imgW};flex-shrink:0;">
+      <img src="${img.dataUrl}" style="width:100%;height:${imgH};object-fit:cover;border-radius:8px;border:1px solid #e2e8f0;display:block;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+      <div style="font-size:9px;color:#94a3b8;text-align:center;margin-top:4px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Slika ${i+1}</div>
+    </div>`).join('')+`</div>`;
+}
+
+async function genReport(id){
+  try{
+  const{lk,ant1,ant2,r1mid,tilt,statusColor,statusBg,chartImg,now,obsRows}=getReportData(id);
+  const srtm=lk.terrainData.length>1;
+
+  // Pre-generiši kartu PRIJE HTML template-a
+  const mapDataUrl = getMapImgForReport(lk);
+  let terrainInfo='';
+  if(srtm){
+    const maxT=lk.terrainData.reduce((a,b)=>a.y>b.y?a:b);
+    const minT=lk.terrainData.reduce((a,b)=>a.y<b.y?a:b);
+    terrainInfo=`<div class="section"><div class="section-title">Profil terena (SRTM)</div>
+      <div class="grid3">
+        <div class="card"><div class="lbl">Tačke</div><div class="val">${lk.terrainData.length}</div></div>
+        <div class="card"><div class="lbl">Min. visina</div><div class="val">${Math.round(minT.y)} m @ ${minT.x.toFixed(2)} km</div></div>
+        <div class="card"><div class="lbl">Max. visina</div><div class="val">${Math.round(maxT.y)} m @ ${maxT.x.toFixed(2)} km</div></div>
+      </div></div>`;
+  }
+  const html=`<!DOCTYPE html><html lang="bs"><head><meta charset="UTF-8">
+<title>Izvještaj — ${lk.name}</title>
+<style>
+@page{margin:18mm 16mm;}*{box-sizing:border-box;margin:0;padding:0;}body{background:#e8eaf0;}@media screen{.page-wrap{max-width:900px;margin:24px auto;background:#fff;padding:28px 36px;border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,0.10);}}
+body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;font-size:12px;color:#1a1a2e;}
+.header{display:flex;align-items:center;justify-content:space-between;padding:14px 0 12px;border-bottom:3px solid #4a9eff;margin-bottom:16px;}
+.logo{width:36px;height:36px;background:linear-gradient(135deg,#4a9eff,#1D9E75);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;}
+h1{font-size:17px;font-weight:700;color:#0f1117;}p.sub{font-size:11px;color:#666;margin-top:1px;}
+.hr{font-size:10px;color:#888;text-align:right;}
+.status{border-radius:6px;padding:9px 14px;margin-bottom:14px;font-size:12px;font-weight:600;color:${statusColor};background:${statusBg};border:1px solid ${statusColor}40;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:12px;}
+.card{background:#f4f6fb;border-radius:7px;padding:9px 12px;border:1px solid #e0e4f0;}
+.lbl{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px;}
+.val{font-size:14px;font-weight:700;color:#1a1a2e;}
+.section{margin-bottom:14px;}
+.section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#4a9eff;border-bottom:1px solid #e0e4f0;padding-bottom:4px;margin-bottom:9px;}
+table{width:100%;border-collapse:collapse;font-size:11px;}th{text-align:left;padding:5px 8px;background:#f0f4ff;border-bottom:2px solid #c8d4f0;font-weight:600;color:#333;font-size:10px;text-transform:uppercase;}
+td{padding:5px 8px;border-bottom:1px solid #eef0f8;}tr:last-child td{border-bottom:none;}tr:nth-child(even)td{background:#fafbff;}
+.chart-wrap{border:1px solid #e0e4f0;border-radius:7px;overflow:hidden;margin-bottom:13px;background:#0f1117;}
+.chart-wrap img{width:100%;display:block;}
+.no-obs{background:#f0faf5;border:1px solid #b0dfc8;border-radius:5px;padding:8px 12px;color:#0F6E56;}
+footer{margin-top:18px;padding-top:9px;border-top:1px solid #e0e4f0;display:flex;justify-content:space-between;font-size:9px;color:#aaa;}
+@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}.no-print{display:none;}}
+</style></head><body>
+<div class="page-wrap">
+${getCoverPageHtml([lk], now)}
+<div class="header">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="logo">F</div>
+    <div><h1>${lk.name}</h1><p class="sub">P2P Radio Link — Fresnel Kalkulator Izvještaj</p></div>
+  </div>
+  <div class="hr"><div>Datum: <b>${now}</b></div><div>Fresnel Kalkulator v3.0${srtm?'<br><span style="color:#f5a623;font-weight:600">✓ SRTM teren</span>':''}</div></div>
+</div>
+<div class="status">${lk.statusTxt}</div>
+<div class="section"><div class="section-title">Lokacije</div>
+<div class="grid2">
+  <div class="card"><div class="lbl">${lk.nameA||'Lokacija A'}</div>
+    <div style="font-size:11px;color:#555;margin-bottom:6px;">${lk.coordA||'—'}</div>
+    <div style="display:flex;gap:12px;">
+      <div><span class="lbl">Nadm. vis.</span><span class="val">${lk.asl1} m</span></div>
+      <div><span class="lbl">Antena AGL</span><span class="val">${lk.h1} m</span></div>
+      <div><span class="lbl">Apsolutno</span><span class="val">${ant1.toFixed(1)} m</span></div>
+    </div>
+  </div>
+  <div class="card"><div class="lbl">${lk.nameB||'Lokacija B'}</div>
+    <div style="font-size:11px;color:#555;margin-bottom:6px;">${lk.coordB||'—'}</div>
+    <div style="display:flex;gap:12px;">
+      <div><span class="lbl">Nadm. vis.</span><span class="val">${lk.asl2} m</span></div>
+      <div><span class="lbl">Antena AGL</span><span class="val">${lk.h2} m</span></div>
+      <div><span class="lbl">Apsolutno</span><span class="val">${ant2.toFixed(1)} m</span></div>
+    </div>
+  </div>
+</div></div>
+<div class="section"><div class="section-title">Fotodokumentacija — ${lk.nameA||'Lokacija A'}</div>${imgBlockHtml(lk,'A',lk.nameA||'Lokacija A')}</div>
+<div class="section"><div class="section-title">Fotodokumentacija — ${lk.nameB||'Lokacija B'}</div>${imgBlockHtml(lk,'B',lk.nameB||'Lokacija B')}</div>
+<div class="section"><div class="section-title">Parametri linka</div>
+<div class="grid3">
+  <div class="card"><div class="lbl">Udaljenost</div><div class="val">${lk.dist.toFixed(3)} km</div></div>
+  <div class="card"><div class="lbl">Frekvencija</div><div class="val">${lk.freq.toFixed(1)} GHz</div></div>
+  <div class="card"><div class="lbl">Tilt A→B</div><div class="val">${(tilt>=0?'+':'')+tilt}°</div></div>
+  <div class="card"><div class="lbl">F1 (sredina)</div><div class="val" style="color:#0F6E56">${r1mid.toFixed(1)} m</div></div>
+  <div class="card"><div class="lbl">60% F1 min</div><div class="val" style="color:#0F6E56">${(r1mid*0.6).toFixed(1)} m</div></div>
+  <div class="card"><div class="lbl">Prepreke</div><div class="val">${lk.obstacles.length}</div></div>
+</div></div>
+${terrainInfo}
+<div class="section"><div class="section-title">Profil linka${srtm?' — SRTM teren':''}</div>
+  <div class="chart-wrap"><img src="${chartImg}"></div>
+  <div style='background:#fffbeb;border:1px solid #f59e0b;border-radius:6px;padding:8px 12px;margin-top:10px;display:flex;gap:8px;align-items:flex-start;'>  <span style='font-size:14px;flex-shrink:0;'>⚠</span>  <p style='font-size:10px;color:#92400e;line-height:1.6;margin:0;'><b>Napomena:</b> Za skeniranje terena korišten je SRTM (Open-Meteo) servis baziran na satelitskim podacima. Može doći do odstupanja u odnosu na realne terenske uvjete zbog ažuriranosti podataka, gustoće vegetacije i lokalnih promjena terena. Preporučuje se terenska provjera kritičnih tačaka.</p></div></div>
+${mapDataUrl?`<div class="section">
+  <div class="section-title">🗺 Karta linka</div>
+  <img src="${mapDataUrl}" style="width:100%;border-radius:6px;border:1px solid #e0e4f0;display:block;">
+</div>`:''}
+<div class="section"><div class="section-title">Prepreke</div>
+${lk.obstacles.length===0?'<div class="no-obs">✓ Nema definisanih prepreka</div>':`<table><thead><tr><th>#</th><th>Naziv</th><th>Visina</th><th>Od Obj. 1</th><th>LOS</th><th>Clearance</th><th>Status</th></tr></thead><tbody>${obsRows.map((o,i)=>`<tr><td>${i+1}</td><td>${o.name}</td><td>${o.asl} m</td><td>${o.d1!==undefined?o.d1.toFixed(2):o.pos.toFixed(2)} km</td><td>${o.los} m</td><td style="color:${o.sc}">${o.clr} m</td><td style="color:${o.sc};font-weight:600">${o.s}</td></tr>`).join('')}</tbody></table>`}
+</div>
+${getAuthorBlockHtml()}
+<footer><div>Fresnel Kalkulator v3.0 — XPT Projekt</div><div>r₁=17.3×√(d₁×d₂/f×d)</div><div>${now}</div></footer>
+<div class="no-print" style="margin-top:18px;text-align:center;">
+  <button onclick="window.print()" style="background:#4a9eff;border:none;color:#fff;padding:9px 24px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;">Štampaj / PDF</button>
+  <button onclick="window.close()" style="background:#222;border:1px solid #444;color:#e8e6f0;padding:9px 18px;border-radius:7px;font-size:13px;cursor:pointer;margin-left:8px;">Zatvori</button>
+</div></div>
+</body></html>`;
+  const w=window.open('','_blank');w.document.write(html);w.document.close();
+  }catch(e){console.error('genReport error:',e);showToast('Greška PDF: '+e.message,'var(--red)');}
+}
+
+// ── calcData helper ──────────────────────────────────────────
+function calcData(lk){
+  if(!lk) return {ant1r:0,ant2r:0,r1midr:0,tiltr:'0',obsResr:[]};
+  const ant1r=(lk.asl1||0)+(lk.h1||0), ant2r=(lk.asl2||0)+(lk.h2||0);
+  const r1midr=17.3*Math.sqrt((lk.dist/2*lk.dist/2)/(lk.freq*lk.dist));
+  const tiltr=(Math.atan2(ant2r-ant1r,lk.dist*1000)*180/Math.PI).toFixed(2);
+  const obsResr=lk.obstacles.map(o=>{
+    const d1=Math.min(o.pos,lk.dist*0.999),d2=lk.dist-d1,p=d1/lk.dist;
+    const r=17.3*Math.sqrt((d1*d2)/(lk.freq*lk.dist));
+    const los=ant1r+(ant2r-ant1r)*p,clr=los-r-o.asl;
+    const s=clr<0?'block':clr<r*0.4?'warn':'ok';
+    const sc=clr<0?'#dc2626':clr<r*0.4?'#d97706':'#059669';
+    return{...o,d1,los:los.toFixed(1),clr:clr.toFixed(1),r,s,sc};
+  });
+  return{ant1r,ant2r,r1midr,tiltr,obsResr};
+}
+
+// ── genProjectReport (PDF cijelog projekta) ──────────────────
+async function genProjectReport(){
+  if(!links.length){showToast('Nema lokacija za izvještaj','var(--red)');return;}
+  try{
+  showToast('Generiram PDF izvještaj...');
+  const now=new Date().toLocaleString('bs-BA');
+
+  const chartImgs=links.map(lk=>{
+    const cv=document.getElementById('canvas-'+lk.id);
+    return cv?cv.toDataURL('image/png'):'';
+  });
+  const mapDataUrls=links.map(lk=>getMapImgForReport(lk));
+
+  const statusColor=s=>s==='ok'?'#059669':s==='warn'?'#d97706':'#dc2626';
+  const statusBg=s=>s==='ok'?'rgba(16,185,129,0.08)':s==='warn'?'rgba(245,158,11,0.08)':'rgba(239,68,68,0.08)';
+  const statusBorder=s=>s==='ok'?'rgba(16,185,129,0.25)':s==='warn'?'rgba(245,158,11,0.25)':'rgba(239,68,68,0.25)';
+  const badgeHtml=s=>`<span style="background:${statusBg(s)};color:${statusColor(s)};border:1px solid ${statusBorder(s)};border-radius:20px;padding:2px 9px;font-size:11px;font-weight:600;">${s==='ok'?'✓ OK':s==='warn'?'⚠ Pažnja':'✗ Blokiran'}</span>`;
+
+  const ok=links.filter(l=>l.status==='ok').length;
+  const warn=links.filter(l=>l.status==='warn').length;
+  const blk=links.filter(l=>l.status==='danger').length;
+
+  const tableRows=links.map((lk,i)=>{
+    const{ant1r,ant2r,r1midr,tiltr}=calcData(lk);
+    return`<tr>
+      <td style="font-weight:600;color:#64748b;">${i+1}</td>
+      <td style="font-weight:700;">${lk.name}</td>
+      <td>${lk.nameA||'—'}<br><span style="font-size:10px;color:#64748b;">${ant1r.toFixed(0)} m aps.</span></td>
+      <td>${lk.nameB||'—'}<br><span style="font-size:10px;color:#64748b;">${ant2r.toFixed(0)} m aps.</span></td>
+      <td>${lk.dist.toFixed(3)} km</td><td>${lk.freq.toFixed(1)} GHz</td>
+      <td style="color:#059669;font-weight:700;">${r1midr.toFixed(1)} m</td>
+      <td>${(tiltr>=0?'+':'')+tiltr}°</td>
+      <td>${lk.obstacles.length||'—'}</td>
+      <td>${badgeHtml(lk.status)}</td>
+    </tr>`;
+  }).join('');
+
+  const linkSections=links.map((lk,i)=>{
+    const{ant1r,ant2r,r1midr,tiltr,obsResr}=calcData(lk);
+    const imgA=lk.images.A.map((img,j)=>{const cnt=lk.images.A.length;const w=cnt===1?'100%':cnt===2?'calc(50% - 4px)':'calc(33.33% - 6px)';const h=cnt===1?'260px':'170px';return`<div style="width:${w};flex-shrink:0;"><img src="${img.dataUrl}" style="width:100%;height:${h};object-fit:cover;border-radius:6px;border:1px solid #e2e8f0;display:block;"><div style="font-size:9px;color:#94a3b8;text-align:center;margin-top:3px;font-weight:600;">Slika ${j+1}</div></div>`;}).join('');
+    const imgB=lk.images.B.map((img,j)=>{const cnt=lk.images.B.length;const w=cnt===1?'100%':cnt===2?'calc(50% - 4px)':'calc(33.33% - 6px)';const h=cnt===1?'260px':'170px';return`<div style="width:${w};flex-shrink:0;"><img src="${img.dataUrl}" style="width:100%;height:${h};object-fit:cover;border-radius:6px;border:1px solid #e2e8f0;display:block;"><div style="font-size:9px;color:#94a3b8;text-align:center;margin-top:3px;font-weight:600;">Slika ${j+1}</div></div>`;}).join('');
+    const chart=chartImgs[i]?`<img src="${chartImgs[i]}" style="width:100%;border:1px solid #e2e8f0;border-radius:6px;">`:'';
+    const mapImg=mapDataUrls[i]?`<img src="${mapDataUrls[i]}" style="width:100%;border:1px solid #e2e8f0;border-radius:6px;">`:'';
+    const obsTbl=obsResr.length?`<table style="width:100%;border-collapse:collapse;font-size:11px;margin-top:8px;"><thead><tr style="background:#f1f5f9;"><th style="padding:5px 8px;text-align:left;border-bottom:1px solid #e2e8f0;font-size:10px;text-transform:uppercase;color:#64748b;">Naziv</th><th style="padding:5px 8px;text-align:left;font-size:10px;text-transform:uppercase;color:#64748b;">Visina</th><th style="padding:5px 8px;font-size:10px;text-transform:uppercase;color:#64748b;">Od Obj.1</th><th style="padding:5px 8px;font-size:10px;text-transform:uppercase;color:#64748b;">Clearance</th><th style="padding:5px 8px;font-size:10px;text-transform:uppercase;color:#64748b;">Status</th></tr></thead><tbody>${obsResr.map(o=>`<tr><td style="padding:5px 8px;border-bottom:1px solid #e2e8f0;">${o.name}</td><td style="border-bottom:1px solid #e2e8f0;padding:5px 8px;">${o.asl} m</td><td style="border-bottom:1px solid #e2e8f0;padding:5px 8px;">${o.d1.toFixed(2)} km</td><td style="border-bottom:1px solid #e2e8f0;padding:5px 8px;color:${o.sc};font-weight:600;">${o.clr} m</td><td style="border-bottom:1px solid #e2e8f0;padding:5px 8px;">${badgeHtml(lk.status)}</td></tr>`).join('')}</tbody></table>`:'<p style="color:#059669;font-weight:600;font-size:12px;">✓ Nema prepreka</p>';
+    return`<div style="page-break-before:always;padding-top:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #3b82f6;padding-bottom:8px;margin-bottom:14px;">
+        <div><div style="font-size:16px;font-weight:800;color:#1e293b;">${lk.name}</div>
+        <div style="font-size:11px;color:#64748b;margin-top:2px;">${lk.nameA||''} → ${lk.nameB||''}</div></div>
+        ${badgeHtml(lk.status)}
+      </div>
+      <div style="background:${statusBg(lk.status)};border:1px solid ${statusBorder(lk.status)};border-radius:6px;padding:8px 14px;margin-bottom:14px;font-size:13px;font-weight:600;color:${statusColor(lk.status)};">${lk.statusTxt}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#3b82f6;margin-bottom:6px;">${lk.nameA||'Objekt 1'}</div>
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">${lk.coordA||'—'}</div>
+          <div style="display:flex;gap:12px;">
+            <div><div style="font-size:9px;color:#94a3b8;font-weight:600;">NADM.</div><div style="font-size:15px;font-weight:700;">${lk.asl1} m</div></div>
+            <div><div style="font-size:9px;color:#94a3b8;font-weight:600;">AGL</div><div style="font-size:15px;font-weight:700;">${lk.h1} m</div></div>
+            <div><div style="font-size:9px;color:#94a3b8;font-weight:600;">APS.</div><div style="font-size:16px;font-weight:800;color:#3b82f6;">${ant1r.toFixed(1)} m</div></div>
+          </div>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#10b981;margin-bottom:6px;">${lk.nameB||'Objekt 2'}</div>
+          <div style="font-size:11px;color:#64748b;margin-bottom:4px;">${lk.coordB||'—'}</div>
+          <div style="display:flex;gap:12px;">
+            <div><div style="font-size:9px;color:#94a3b8;font-weight:600;">NADM.</div><div style="font-size:15px;font-weight:700;">${lk.asl2} m</div></div>
+            <div><div style="font-size:9px;color:#94a3b8;font-weight:600;">AGL</div><div style="font-size:15px;font-weight:700;">${lk.h2} m</div></div>
+            <div><div style="font-size:9px;color:#94a3b8;font-weight:600;">APS.</div><div style="font-size:16px;font-weight:800;color:#10b981;">${ant2r.toFixed(1)} m</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px;">
+        ${[['Udaljenost',lk.dist.toFixed(3)+' km'],['Frekvencija',lk.freq.toFixed(1)+' GHz'],['F1 (sredina)',r1midr.toFixed(1)+' m'],['60% F1',(r1midr*0.6).toFixed(1)+' m'],['Tilt',(tiltr>=0?'+':'')+tiltr+'°']].map(([l,v])=>`
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:8px 10px;">
+          <div style="font-size:9px;font-weight:700;color:#94a3b8;text-transform:uppercase;margin-bottom:3px;">${l}</div>
+          <div style="font-size:13px;font-weight:700;color:#1e293b;">${v}</div>
+        </div>`).join('')}
+      </div>
+      ${imgA?`<div style="margin-bottom:12px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#3b82f6;margin-bottom:6px;border-bottom:1px solid #dbeafe;padding-bottom:4px;">📷 ${lk.nameA||'Objekt 1'}</div><div style="display:flex;flex-wrap:wrap;gap:8px;">${imgA}</div></div>`:''}
+      ${imgB?`<div style="margin-bottom:12px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#10b981;margin-bottom:6px;border-bottom:1px solid #d1fae5;padding-bottom:4px;">📷 ${lk.nameB||'Objekt 2'}</div><div style="display:flex;flex-wrap:wrap;gap:8px;">${imgB}</div></div>`:''}
+      <div style="margin-bottom:12px;">${chart}</div>
+      ${mapImg?`<div style="margin-bottom:12px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;color:#64748b;margin-bottom:6px;">🗺 Karta linka</div>${mapImg}</div>`:''}
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#64748b;margin-bottom:6px;">Prepreke</div>
+      ${obsTbl}
+    </div>`;
+  }).join('');
+
+  const html=`<!DOCTYPE html><html lang="bs"><head><meta charset="UTF-8">
+<title>Izvještaj — ${projectName}</title>
+<style>
+@page{margin:16mm 14mm;}*{box-sizing:border-box;margin:0;padding:0;}body{background:#e8eaf0;}@media screen{.page-wrap{max-width:920px;margin:24px auto;background:#fff;padding:28px 36px;border-radius:8px;box-shadow:0 4px 24px rgba(0,0,0,0.10);}}
+body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;font-size:12px;color:#1e293b;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+table{width:100%;border-collapse:collapse;font-size:11px;}
+th{text-align:left;padding:7px 10px;background:#f1f5f9;border-bottom:2px solid #e2e8f0;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#64748b;}
+td{padding:7px 10px;border-bottom:1px solid #e2e8f0;vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+@media print{.no-print{display:none!important;}}
+</style></head><body>
+<div class="page-wrap">
+${getCoverPageHtml(links, now)}
+<div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;border-bottom:3px solid #3b82f6;margin-bottom:20px;">
+  <div><div style="font-size:24px;font-weight:900;color:#1e293b;letter-spacing:-.02em;">${projectName}</div>
+  <div style="font-size:11px;color:#64748b;margin-top:3px;">Fresnel Kalkulator v3.0 — P2P Radio Link Izvještaj</div></div>
+  <div style="text-align:right;font-size:10px;color:#94a3b8;">${now}</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;">
+  ${[['Ukupno',links.length,'#3b82f6'],['OK',ok,'#059669'],['Pažnja',warn,'#d97706'],['Blokirano',blk,'#dc2626']].map(([l,v,c])=>`
+  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;">
+    <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94a3b8;">${l}</div>
+    <div style="font-size:28px;font-weight:900;color:${c};line-height:1.1;margin-top:4px;">${v}</div>
+  </div>`).join('')}
+</div>
+<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;margin-bottom:8px;">
+  <div style="padding:10px 14px;border-bottom:1px solid #e2e8f0;font-size:10px;font-weight:700;text-transform:uppercase;color:#64748b;background:#f8fafc;">Pregled svih lokacija</div>
+  <table><thead><tr><th>#</th><th>Naziv</th><th>Objekt 1</th><th>Objekt 2</th><th>Udal.</th><th>Freq.</th><th>F1</th><th>Tilt</th><th>Prep.</th><th>Status</th></tr></thead><tbody>${tableRows}</tbody></table>
+</div>
+${linkSections}
+<div style="background:#fffbeb;border:1px solid #f59e0b;border-radius:6px;padding:8px 12px;margin-top:10px;display:flex;gap:8px;align-items:flex-start;">  <span style="font-size:14px;flex-shrink:0;">⚠</span>  <p style="font-size:10px;color:#92400e;line-height:1.6;margin:0;"><b>Napomena:</b> Za skeniranje terena korišten je SRTM (Open-Meteo) servis baziran na satelitskim podacima. Može doći do odstupanja u odnosu na realne terenske uvjete zbog ažuriranosti podataka, gustoće vegetacije i lokalnih promjena terena. Preporučuje se terenska provjera kritičnih tačaka.</p></div>
+${getAuthorBlockHtml()}
+<div style="margin-top:24px;padding-top:10px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:9px;color:#94a3b8;">
+  <div>Fresnel Kalkulator v3.0</div><div>r₁ = 17.3 × √(d₁×d₂ / f×d)</div><div>${now}</div>
+</div>
+<div style="margin-top:18px;text-align:center;" class="no-print">
+  <button onclick="window.print()" style="background:#3b82f6;border:none;color:#fff;padding:10px 28px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Štampaj / Sačuvaj PDF</button>
+  <button onclick="window.close()" style="background:#f1f5f9;border:1px solid #e2e8f0;color:#64748b;padding:10px 20px;border-radius:8px;font-size:14px;cursor:pointer;margin-left:8px;">Zatvori</button>
+</div></div>
+</body></html>`;
+  const win=window.open('','_blank');win.document.write(html);win.document.close();
+  }catch(e){console.error('genProjectReport error:',e);showToast('Greška PDF: '+e.message,'var(--red)');}
+}
+async function genWord(id){
+  try{
+    const{lk,ant1,ant2,r1mid,tilt,statusColor,statusBg,chartImg,now,obsRows}=getReportData(id);
+    if(!lk){showToast('Greška: lokacija nije pronađena','var(--red)');return;}
+    showToast('Generišem Word...');
+    await loadJSZip();
+    const zip = buildWordDoc(lk, ant1, ant2, r1mid, tilt, statusColor, statusBg, chartImg, now, obsRows);
+    const blob = await zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+    downloadBlob(blob,(lk.name||'izvjestaj').replace(/[^a-zA-Z0-9_\- ]/g,'_')+'_fresnel.docx');
+    showToast('✓ Word preuzet');
+  }catch(e){console.error(e);showToast('Greška: '+e.message,'var(--red)');}
+}
+
+async function genProjectWord(){
+  if(!links.length){showToast('Nema lokacija','var(--red)');return;}
+  try{
+    showToast('Generišem Word za cijeli projekat...');
+    await loadJSZip();
+    const zip = buildProjectWordDoc();
+    const blob = await zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+    downloadBlob(blob,(projectName||'projekat').replace(/[^a-zA-Z0-9_\- ]/g,'_')+'_kompletan.docx');
+    showToast('✓ Word preuzet');
+  }catch(e){console.error(e);showToast('Greška: '+e.message,'var(--red)');}
+}
+
+// ── Zajednički Word builder ──────────────────────────────────
+async function loadJSZip(){
+  if(typeof JSZip==='undefined'){
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+      s.onload=res;s.onerror=()=>rej(new Error('JSZip nije učitan'));
+      document.head.appendChild(s);
+    });
+  }
+}
+
+function downloadBlob(blob, filename){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+function dataUrlToBytes(dataUrl){
+  const b64=dataUrl.split(',')[1];const bin=atob(b64);
+  const bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+  return bytes;
+}
+function mimeFromDataUrl(d){return d.match(/data:([^;]+);/)?.[1]||'image/png';}
+function extFromMime(m){return m.includes('jpeg')||m.includes('jpg')?'jpg':m.includes('gif')?'gif':'png';}
+
+// ── Gradi ZIP za jednu lokaciju ───────────────────────────────
+function buildWordDoc(lk, ant1, ant2, r1mid, tilt, statusColor, statusBg, chartImg, now, obsRows){
+  const media=[];let rid=10;
+  function addImg(dataUrl,name){
+    if(!dataUrl)return null;
+    const mime=mimeFromDataUrl(dataUrl),ext=extFromMime(mime);
+    const rId='rId'+rid++;
+    media.push({fname:`media/${name}.${ext}`,bytes:dataUrlToBytes(dataUrl),mime,rId});
+    return rId;
+  }
+
+  const chartRid=chartImg?addImg(chartImg,'chart'):null;
+  const mapRid=getMapImgForReport(lk)?addImg(getMapImgForReport(lk),'map'):null;
+
+  // Slike A — max 4
+  const imgRidsA=lk.images.A.map((img,i)=>addImg(img.dataUrl,'imgA'+i));
+  const imgRidsB=lk.images.B.map((img,i)=>addImg(img.dataUrl,'imgB'+i));
+
+  const body = getCoverPageWord([lk], now) + buildSingleLocBody(lk,ant1,ant2,r1mid,tilt,statusColor,statusBg,now,obsRows,chartRid,mapRid,imgRidsA,imgRidsB,now);
+  return makeZip(body,media);
+}
+
+// ── Gradi ZIP za cijeli projekat ─────────────────────────────
+function buildProjectWordDoc(){
+  const media=[];let rid=10;
+  function addImg(dataUrl,name){
+    if(!dataUrl)return null;
+    const mime=mimeFromDataUrl(dataUrl),ext=extFromMime(mime);
+    const rId='rId'+rid++;
+    media.push({fname:`media/${name}.${ext}`,bytes:dataUrlToBytes(dataUrl),mime,rId});
+    return rId;
+  }
+
+  const now=new Date().toLocaleString('bs-BA');
+  const ok=links.filter(l=>l.status==='ok').length;
+  const warn=links.filter(l=>l.status==='warn').length;
+  const blk=links.filter(l=>l.status==='danger').length;
+
+  let body='';
+  body+=getCoverPageWord(links, now);
+  // Naslov projekta
+  body+=wPara(projectName,{sz:40,bold:true,color:'1F4E79',spBefore:0,spAfter:80});
+  body+=wPara('Fresnel Kalkulator v3.0 — P2P Radio Link Izvještaj · '+now,{sz:18,color:'64748B',spAfter:60});
+  // Sažetak
+  body+=wTbl([[
+    {t:'UKUPNO',bg:'1F4E79',bold:true,color:'FFFFFF'},{t:'OK',bg:'059669',bold:true,color:'FFFFFF'},
+    {t:'PAŽNJA',bg:warn?'D97706':'E2E8F0',bold:true,color:'FFFFFF'},{t:'BLOKIR.',bg:blk?'DC2626':'E2E8F0',bold:true,color:'FFFFFF'}
+  ],[
+    {t:''+links.length,color:'1F4E79',bold:true,sz:28},{t:''+ok,color:'059669',bold:true,sz:28},
+    {t:''+warn,color:warn?'D97706':'94A3B8',bold:true,sz:28},{t:''+blk,color:blk?'DC2626':'94A3B8',bold:true,sz:28}
+  ]],[2409,2409,2410,2410]);
+  body+=wPara('',{spAfter:120});
+
+  // Tabela pregleda
+  body+=wHeading('Pregled svih lokacija');
+  const tHdr=[{t:'#',bg:'1F4E79',bold:true,color:'FFFFFF'},{t:'Naziv',bg:'1F4E79',bold:true,color:'FFFFFF'},
+    {t:'Objekt 1',bg:'1F4E79',bold:true,color:'FFFFFF'},{t:'Objekt 2',bg:'1F4E79',bold:true,color:'FFFFFF'},
+    {t:'Udaljenost',bg:'1F4E79',bold:true,color:'FFFFFF'},{t:'Freq.',bg:'1F4E79',bold:true,color:'FFFFFF'},
+    {t:'Status',bg:'1F4E79',bold:true,color:'FFFFFF'}];
+  const tRows=[tHdr,...links.map((lk,i)=>{
+    const{ant1r,ant2r}=calcData(lk);
+    const sc=lk.status==='ok'?'059669':lk.status==='warn'?'D97706':'DC2626';
+    const bg=i%2?'F1F5F9':'FFFFFF';
+    return[{t:''+(i+1),bg},{t:lk.name,bold:true,bg},{t:(lk.nameA||'—')+' ('+ant1r.toFixed(0)+'m)',bg},
+      {t:(lk.nameB||'—')+' ('+ant2r.toFixed(0)+'m)',bg},{t:lk.dist.toFixed(3)+' km',bg},
+      {t:lk.freq.toFixed(1)+' GHz',bg},{t:lk.status==='ok'?'✓ OK':lk.status==='warn'?'⚠ Pažnja':'✗ Blokiran',color:sc,bold:true,bg}];
+  })];
+  body+=wTbl(tRows,[380,1600,1700,1700,1100,860,1298]);
+  body+=wPara('',{spAfter:80});
+
+  // Po lokacija sekcije
+  links.forEach((lk,i)=>{
+    const{ant1r,ant2r,r1midr,tiltr,obsResr}=calcData(lk);
+    const cv=document.getElementById('canvas-'+lk.id);
+    const chartImg=cv?cv.toDataURL('image/png'):null;
+    const chartRid=chartImg?addImg(chartImg,'chart'+i):null;
+    const mapRid=getMapImgForReport(lk)?addImg(getMapImgForReport(lk),'map'+i):null;
+    const imgRidsA=lk.images.A.map((img,j)=>addImg(img.dataUrl,'imgA'+i+'_'+j));
+    const imgRidsB=lk.images.B.map((img,j)=>addImg(img.dataUrl,'imgB'+i+'_'+j));
+    const sc=lk.status==='ok'?'059669':lk.status==='warn'?'D97706':'DC2626';
+    const stFill=lk.status==='ok'?'ECFDF5':lk.status==='warn'?'FFFBEB':'FEF2F2';
+
+    body+=wPageBreak();
+    body+=wPara(lk.name,{sz:30,bold:true,color:'1F4E79',spBefore:0,spAfter:40});
+    body+=wPara((lk.nameA||'Objekt 1')+' → '+(lk.nameB||'Objekt 2'),{sz:18,color:'64748B',spAfter:80});
+    body+=wTbl([[{t:lk.statusTxt,bold:true,bg:stFill,color:sc,span:4}]],[9638]);
+    body+=wPara('',{spAfter:60});
+
+    // Objekti
+    body+=wHeading('Lokacije');
+    body+=wTbl([
+      [{t:'',bg:'1F4E79',bold:true,color:'FFFFFF'},{t:lk.nameA||'Objekt 1',bg:'1F4E79',bold:true,color:'FFFFFF'},{t:lk.nameB||'Objekt 2',bg:'1F4E79',bold:true,color:'FFFFFF'}],
+      [{t:'Koordinate',bg:'DEEAF1',bold:true},{t:lk.coordA||'—'},{t:lk.coordB||'—'}],
+      [{t:'Nadm. visina',bg:'DEEAF1',bold:true},{t:lk.asl1+' m'},{t:lk.asl2+' m'}],
+      [{t:'Antena AGL',bg:'DEEAF1',bold:true},{t:lk.h1+' m'},{t:lk.h2+' m'}],
+      [{t:'Apsolutno',bg:'DEEAF1',bold:true},{t:ant1r.toFixed(1)+' m',bold:true,color:'1F4E79'},{t:ant2r.toFixed(1)+' m',bold:true,color:'065F46'}],
+    ],[2000,3819,3819]);
+    body+=wPara('',{spAfter:60});
+
+    body+=buildSingleLocBody(lk,ant1r,ant2r,r1midr,tiltr,sc,stFill,now,obsResr,chartRid,mapRid,imgRidsA,imgRidsB,now,true);
+  });
+
+  // Napomena — jednom na kraju
+  body+=`<w:p><w:pPr><w:spacing w:before="160" w:after="80"/>
+    <w:pBdr><w:top w:val="single" w:sz="4" w:color="F59E0B"/><w:left w:val="single" w:sz="4" w:color="F59E0B"/><w:bottom w:val="single" w:sz="4" w:color="F59E0B"/><w:right w:val="single" w:sz="4" w:color="F59E0B"/></w:pBdr>
+    <w:shd w:val="clear" w:color="auto" w:fill="FFFBEB"/></w:pPr>
+    <w:r><w:rPr><w:b/><w:sz w:val="18"/><w:color w:val="92400E"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr><w:t xml:space="preserve">⚠ Napomena: </w:t></w:r>
+    <w:r><w:rPr><w:sz w:val="18"/><w:color w:val="92400E"/><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr><w:t xml:space="preserve">Za skeniranje terena korišten je SRTM (Open-Meteo) servis baziran na satelitskim podacima. Može doći do odstupanja u odnosu na realne terenske uvjete zbog ažuriranosti podataka, gustoće vegetacije i lokalnih promjena terena. Preporučuje se terenska provjera kritičnih tačaka.</w:t></w:r>
+    </w:p>`;
+  body+=getAuthorBlockWord();
+  body+=wPara('Fresnel Kalkulator v3.0 — XPT Radio Projekt | '+now,{sz:16,color:'94A3B8',center:true,spBefore:120});
+  return makeZip(body,media);
+}
+
+// ── Tijelo jedne lokacije (dijeljeno) ────────────────────────
+function buildSingleLocBody(lk,ant1,ant2,r1mid,tilt,sc,stFill,now,obsRows,chartRid,mapRid,imgRidsA,imgRidsB,_now,skipHeader=false){
+  let b='';
+
+  if(!skipHeader){
+    b+=wPara(lk.name,{sz:34,bold:true,color:'1F4E79',spBefore:0,spAfter:40});
+    b+=wPara((lk.nameA||'Objekt 1')+' → '+(lk.nameB||'Objekt 2'),{sz:18,color:'64748B',spAfter:80});
+    b+=wTbl([[{t:lk.statusTxt,bold:true,bg:stFill,color:sc,span:4}]],[9638]);
+    b+=wPara('',{spAfter:60});
+
+    b+=wHeading('Lokacije');
+    b+=wTbl([
+      [{t:'',bg:'1F4E79',bold:true,color:'FFFFFF'},{t:lk.nameA||'Objekt 1',bg:'1F4E79',bold:true,color:'FFFFFF'},{t:lk.nameB||'Objekt 2',bg:'1F4E79',bold:true,color:'FFFFFF'}],
+      [{t:'Koordinate',bg:'DEEAF1',bold:true},{t:lk.coordA||'—'},{t:lk.coordB||'—'}],
+      [{t:'Nadm. visina',bg:'DEEAF1',bold:true},{t:lk.asl1+' m'},{t:lk.asl2+' m'}],
+      [{t:'Antena AGL',bg:'DEEAF1',bold:true},{t:lk.h1+' m'},{t:lk.h2+' m'}],
+      [{t:'Apsolutno',bg:'DEEAF1',bold:true},{t:ant1.toFixed(1)+' m',bold:true,color:'1F4E79'},{t:ant2.toFixed(1)+' m',bold:true,color:'065F46'}],
+    ],[2000,3819,3819]);
+    b+=wPara('',{spAfter:60});
+  }
+
+  // Parametri
+  b+=wHeading('Parametri linka');
+  b+=wTbl([
+    [{t:'Udaljenost',bg:'DEEAF1',bold:true},{t:lk.dist.toFixed(3)+' km'},{t:'Frekvencija',bg:'DEEAF1',bold:true},{t:lk.freq.toFixed(1)+' GHz'}],
+    [{t:'Tilt A→B',bg:'DEEAF1',bold:true},{t:(tilt>=0?'+':'')+tilt+'°'},{t:'F1 poluprecnik',bg:'DEEAF1',bold:true},{t:parseFloat(r1mid).toFixed(1)+' m'}],
+    [{t:'60% F1',bg:'DEEAF1',bold:true},{t:(parseFloat(r1mid)*0.6).toFixed(1)+' m',color:'059669',bold:true},{t:'Prepreke',bg:'DEEAF1',bold:true},{t:''+lk.obstacles.length}],
+  ],[2200,2619,2200,2619]);
+  b+=wPara('',{spAfter:80});
+
+  // Slike A
+  if(imgRidsA.length){
+    b+=wHeading('Fotodokumentacija — '+(lk.nameA||'Objekt 1'));
+    b+=wImgGrid(imgRidsA);
+    b+=wPara('',{spAfter:60});
+  }
+
+  // Slike B
+  if(imgRidsB.length){
+    b+=wHeading('Fotodokumentacija — '+(lk.nameB||'Objekt 2'));
+    b+=wImgGrid(imgRidsB);
+    b+=wPara('',{spAfter:60});
+  }
+
+  // Grafikon
+  if(chartRid){
+    b+=wHeading('Profil linka');
+    b+=wPic(chartRid,9999,5760000,2700000);
+    b+=wPara('',{spAfter:60});
+  }
+
+  // Karta
+  if(mapRid){
+    b+=wHeading('Karta linka');
+    b+=wPic(mapRid,9998,5760000,3200000);
+    b+=wPara('',{spAfter:60});
+  }
+
+  // Prepreke
+  b+=wHeading('Prepreke');
+  if(!obsRows.length){
+    b+=wPara('✓ Nema definisanih prepreka',{sz:20,color:'059669',bold:true,spAfter:60});
+  } else {
+    b+=wTbl([
+      [{t:'Naziv',bg:'1F4E79',bold:true,color:'FFFFFF'},{t:'Visina',bg:'1F4E79',bold:true,color:'FFFFFF'},
+       {t:'Od Obj.1',bg:'1F4E79',bold:true,color:'FFFFFF'},{t:'LOS',bg:'1F4E79',bold:true,color:'FFFFFF'},
+       {t:'Clearance',bg:'1F4E79',bold:true,color:'FFFFFF'},{t:'Status',bg:'1F4E79',bold:true,color:'FFFFFF'}],
+      ...obsRows.map((o,j)=>{
+        const sc2=o.s==='block'?'DC2626':o.s==='warn'?'D97706':'059669';
+        const sb=o.s==='block'?'BLOKIRAN':o.s==='warn'?'Pažnja':'OK';
+        const d1=o.d1!==undefined?o.d1:o.pos;
+        const bg=j%2?'F1F5F9':'FFFFFF';
+        return[{t:o.name,bg},{t:o.asl+' m',bg},{t:parseFloat(d1).toFixed(2)+' km',bg},
+               {t:o.los+' m',bg},{t:o.clr+' m',color:sc2,bold:true,bg},{t:sb,color:sc2,bold:true,bg}];
+      })
+    ],[2100,1200,1200,1400,1400,2338]);
+  }
+  b+=wPara('',{spAfter:80});
+  // Autor — samo za genWord (pojedinačna lokacija, skipHeader=false)
+  if(!skipHeader) b+=getAuthorBlockWord();
+  return b;
+}
+
+// ── Word XML helpers ─────────────────────────────────────────
+function wPara(text,opts={}){
+  const sz=opts.sz||22;
+  const bold=opts.bold?'<w:b/>':'';
+  const color=opts.color?`<w:color w:val="${opts.color}"/>`:'';
+  const spB=opts.spBefore!==undefined?opts.spBefore:120;
+  const spA=opts.spAfter!==undefined?opts.spAfter:60;
+  const jc=opts.center?'<w:jc w:val="center"/>':`<w:jc w:val="left"/>`;
+  return`<w:p><w:pPr><w:spacing w:before="${spB}" w:after="${spA}"/>${jc}</w:pPr>
+  <w:r><w:rPr>${bold}<w:sz w:val="${sz}"/><w:szCs w:val="${sz}"/>${color}<w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr>
+  <w:t xml:space="preserve">${text}</w:t></w:r></w:p>`;
+}
+
+function wHeading(text){
+  return`<w:p><w:pPr><w:spacing w:before="200" w:after="80"/>
+  <w:pBdr><w:bottom w:val="single" w:sz="6" w:space="4" w:color="3B82F6"/></w:pBdr></w:pPr>
+  <w:r><w:rPr><w:b/><w:sz w:val="24"/><w:szCs w:val="24"/><w:color w:val="1F4E79"/>
+  <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr>
+  <w:t>${text}</w:t></w:r></w:p>`;
+}
+
+function wPageBreak(){return`<w:p><w:r><w:br w:type="page"/></w:r></w:p>`;}
+
+function wTbl(rows, colWidths){
+  const total=colWidths.reduce((a,b)=>a+b,0);
+  const rowsXml=rows.map(cells=>`<w:tr>${cells.map((cell,ci)=>{
+    const span=cell.span||1;
+    const w=cell.span?colWidths.slice(ci,ci+span).reduce((a,b)=>a+b,0):colWidths[ci]||1200;
+    const bg=cell.bg?`<w:shd w:val="clear" w:color="auto" w:fill="${cell.bg}"/>`:'';
+    const bold=cell.bold?'<w:b/>':'';
+    const color=cell.color?`<w:color w:val="${cell.color}"/>`:cell.bg&&!['DEEAF1','F1F5F9','FFFFFF','ECFDF5','FFFBEB','FEF2F2','E2E8F0'].includes(cell.bg)?'<w:color w:val="FFFFFF"/>':'';
+    const spanXml=cell.span?`<w:gridSpan w:val="${span}"/>`:'';
+    return`<w:tc><w:tcPr>${spanXml}<w:tcW w:w="${w}" w:type="dxa"/>${bg}
+      <w:tcBorders><w:top w:val="single" w:sz="4" w:color="E2E8F0"/><w:left w:val="single" w:sz="4" w:color="E2E8F0"/>
+      <w:bottom w:val="single" w:sz="4" w:color="E2E8F0"/><w:right w:val="single" w:sz="4" w:color="E2E8F0"/></w:tcBorders>
+      <w:tcMar><w:top w:w="80" w:type="dxa"/><w:left w:w="120" w:type="dxa"/><w:bottom w:w="80" w:type="dxa"/><w:right w:w="120" w:type="dxa"/></w:tcMar>
+      </w:tcPr><w:p><w:pPr><w:spacing w:before="40" w:after="40"/></w:pPr>
+      <w:r><w:rPr>${bold}${color}<w:sz w:val="20"/><w:szCs w:val="20"/>
+      <w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr>
+      <w:t xml:space="preserve">${cell.t||''}</w:t></w:r></w:p></w:tc>`;
+  }).join('')}</w:tr>`).join('');
+  return`<w:tbl><w:tblPr><w:tblW w:w="${total}" w:type="dxa"/>
+    <w:tblBorders><w:insideH w:val="single" w:sz="4" w:color="E2E8F0"/><w:insideV w:val="single" w:sz="4" w:color="E2E8F0"/></w:tblBorders>
+    </w:tblPr><w:tblGrid>${colWidths.map(w=>`<w:gridCol w:w="${w}"/>`).join('')}</w:tblGrid>${rowsXml}</w:tbl>`;
+}
+
+function wPic(rId, idx, cx, cy){
+  return`<w:p><w:r><w:rPr/><w:drawing>
+  <wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">
+    <wp:extent cx="${cx}" cy="${cy}"/>
+    <wp:effectExtent l="0" t="0" r="0" b="0"/>
+    <wp:docPr id="${idx}" name="Img${idx}"/>
+    <wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr>
+    <a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
+      <a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+        <pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
+          <pic:nvPicPr><pic:cNvPr id="${idx}" name="Img${idx}"/><pic:cNvPicPr/></pic:nvPicPr>
+          <pic:blipFill>
+            <a:blip r:embed="${rId}" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/>
+            <a:stretch><a:fillRect/></a:stretch>
+          </pic:blipFill>
+          <pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm>
+            <a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>
+        </pic:pic>
+      </a:graphicData>
+    </a:graphic>
+  </wp:inline>
+</w:drawing></w:r></w:p>`;
+}
+
+let wPicIdx=100;
+function wImgGrid(rids){
+  if(!rids.length)return wPara('Nema slika',{sz:18,color:'94A3B8'});
+  const cnt=rids.length;
+  // 1 slika — puna širina; 2+ — dvije kolone
+  const cx=cnt===1?5760000:2700000;
+  const cy=cnt===1?3840000:1980000;
+  if(cnt===1) return wPic(rids[0],wPicIdx++,cx,cy);
+  // Više slika — tbl sa jednom ćelijom po slici, 2 u redu
+  let xml='';
+  for(let i=0;i<rids.length;i+=2){
+    const r1=rids[i], r2=rids[i+1];
+    xml+=`<w:tbl><w:tblPr><w:tblW w:w="9638" w:type="dxa"/>
+      <w:tblBorders><w:insideH w:val="none"/><w:insideV w:val="none"/><w:top w:val="none"/><w:bottom w:val="none"/><w:left w:val="none"/><w:right w:val="none"/></w:tblBorders>
+      </w:tblPr><w:tblGrid><w:gridCol w:w="4819"/><w:gridCol w:w="4819"/></w:tblGrid>
+      <w:tr>
+      <w:tc><w:tcPr><w:tcW w:w="4819" w:type="dxa"/><w:tcBorders><w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/></w:tcBorders></w:tcPr>
+        <w:p><w:r><w:rPr/><w:drawing><wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"><wp:extent cx="${cx}" cy="${cy}"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="${wPicIdx}" name="Img${wPicIdx}"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="${wPicIdx}" name="Img${wPicIdx++}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${r1}" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>
+      </w:tc>
+      <w:tc><w:tcPr><w:tcW w:w="4819" w:type="dxa"/><w:tcBorders><w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/></w:tcBorders></w:tcPr>
+        ${r2?`<w:p><w:r><w:rPr/><w:drawing><wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"><wp:extent cx="${cx}" cy="${cy}"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:docPr id="${wPicIdx}" name="Img${wPicIdx}"/><wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="${wPicIdx}" name="Img${wPicIdx++}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${r2}" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`
+        :`<w:p><w:r><w:t> </w:t></w:r></w:p>`}
+      </w:tc>
+      </w:tr></w:tbl>`;
+  }
+  return xml;
+}
+
+function makeZip(body, media){
+  const NS='xmlns:wpc="http://schemas.microsoft.com/office/word/2010/wordprocessingCanvas" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:wp14="http://schemas.microsoft.com/office/word/2010/wordprocessingDrawing" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml" xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" xmlns:wne="http://schemas.microsoft.com/office/word/2006/wordml" xmlns:wps="http://schemas.microsoft.com/office/word/2010/wordprocessingShape" mc:Ignorable="w14 w15 wp14"';
+  const docXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document ${NS}><w:body>
+${body}
+<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1000" w:right="1000" w:bottom="1000" w:left="1000" w:header="709" w:footer="709" w:gutter="0"/></w:sectPr>
+</w:body></w:document>`;
+
+  const mimeTypes=[...new Set(media.map(m=>m.mime))];
+  const ct=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  ${mimeTypes.map(m=>`<Default Extension="${extFromMime(m)}" ContentType="${m}"/>`).join('\n  ')}
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+  <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
+  <Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/>
+</Types>`;
+
+  const rels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/>
+  ${media.map(m=>`<Relationship Id="${m.rId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="${m.fname}"/>`).join('\n  ')}
+</Relationships>`;
+
+  const zip=new JSZip();
+  zip.file('[Content_Types].xml',ct);
+  zip.file('_rels/.rels',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`);
+  zip.file('word/document.xml',docXml);
+  zip.file('word/_rels/document.xml.rels',rels);
+  zip.file('word/styles.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/><w:sz w:val="22"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>`);
+  zip.file('word/settings.xml',`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:compat><w:compatSetting w:name="compatibilityMode" w:uri="http://schemas.microsoft.com/office/word" w:val="15"/></w:compat></w:settings>`);
+  media.forEach(m=>zip.file('word/'+m.fname,m.bytes));
+  return zip;
+}
+
+
+// Karta linka — iz uploadovanih slika
+function getMapImgForReport(lk){
+  if(!lk.images||!lk.images.Map||!lk.images.Map.length) return null;
+  return lk.images.Map[0].dataUrl;
+}
+function getMapImgHtml(lk){
+  const img = getMapImgForReport(lk);
+  if(!img) return '';
+  return `<div style="margin-bottom:14px;">
+    <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#64748b;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #e2e8f0;">🗺 Karta linka</div>
+    <img src="${img}" style="width:100%;border-radius:6px;border:1px solid #e2e8f0;display:block;">
+    ${lk.images.Map.length>1?`<img src="${lk.images.Map[1].dataUrl}" style="width:100%;border-radius:6px;border:1px solid #e2e8f0;display:block;margin-top:6px;">`:''}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// OPŠTI PREGLED
+// ═══════════════════════════════════════════════════════════
+let projectName = 'XPT Projekat';
+let ovView = 'project';
+
+function renderOverview(){
+  const cont = document.getElementById('overviewContent');
+  if(!cont) return;
+  renderOvProject(cont);
+}
+
+function renderOvProject(cont){
+  const total = links.length;
+  const ok    = links.filter(l=>l.status==='ok').length;
+  const warn  = links.filter(l=>l.status==='warn').length;
+  const blk   = links.filter(l=>l.status==='danger').length;
+
+  const dot = s=>`<span style="width:8px;height:8px;border-radius:50%;background:${s==='ok'?'var(--green)':s==='warn'?'var(--amber)':'var(--red)'};display:inline-block;flex-shrink:0;margin-right:4px;"></span>`;
+  const badge = s=>{
+    const c=s==='ok'?['rgba(16,185,129,0.1)','#059669','✓ OK']:s==='warn'?['rgba(245,158,11,0.1)','#d97706','⚠ Pažnja']:['rgba(239,68,68,0.1)','#dc2626','✗ Blokiran'];
+    return`<span style="background:${c[0]};color:${c[1]};border:1px solid ${c[1]}40;border-radius:20px;padding:2px 9px;font-size:11px;font-weight:600;">${c[2]}</span>`;
+  };
+
+  cont.innerHTML=`
+  <!-- Projekt header -->
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;margin-bottom:16px;box-shadow:var(--shadow);">
+    <div style="display:flex;align-items:flex-start;gap:14px;">
+      <div style="width:44px;height:44px;background:linear-gradient(135deg,var(--blue),var(--teal));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:0 2px 8px rgba(59,130,246,0.3);">📡</div>
+      <div style="flex:1;min-width:0;">
+        <input id="projNameInput" value="${projectName}"
+          oninput="projectName=this.value;document.getElementById('projectBadge').textContent=this.value;document.getElementById('mainHeaderTitle').textContent=this.value;renderTabs();"
+          style="font-size:20px;font-weight:800;color:var(--text);background:transparent;border:none;border-bottom:2px solid transparent;outline:none;width:100%;transition:border-color .2s;padding:1px 0;letter-spacing:-.02em;"
+          onfocus="this.style.borderBottomColor='var(--blue)'"
+          onblur="this.style.borderBottomColor='transparent'"
+          placeholder="Naziv projekta (npr. Policijska uprava Doboj)...">
+        <div style="font-size:11px;color:var(--text3);margin-top:3px;">Klikni na naziv za izmjenu · ${new Date().toLocaleDateString('bs-BA')}</div>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+          <button onclick="genProjectReport()" style="background:var(--blue);border:none;color:#fff;border-radius:var(--rs);padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 1px 3px rgba(59,130,246,0.35);" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+            📄 PDF — Cijeli projekat
+          </button>
+          <button onclick="genProjectWord()" style="background:var(--bg2);border:1.5px solid var(--border2);color:var(--text);border-radius:var(--rs);padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:var(--shadow);" onmouseover="this.style.borderColor='var(--blue)';this.style.color='var(--blue)'" onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text)'">
+            📝 Word — Cijeli projekat
+          </button>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;flex-shrink:0;padding-top:4px;text-align:center;">
+        <div><div style="font-size:26px;font-weight:800;color:var(--blue);line-height:1">${total}</div><div style="font-size:9px;color:var(--text2);margin-top:2px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Lokacija</div></div>
+        <div><div style="font-size:26px;font-weight:800;color:#059669;line-height:1">${ok}</div><div style="font-size:9px;color:var(--text2);margin-top:2px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">OK</div></div>
+        ${warn?`<div><div style="font-size:26px;font-weight:800;color:#d97706;line-height:1">${warn}</div><div style="font-size:9px;color:var(--text2);margin-top:2px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Pažnja</div></div>`:''}
+        ${blk?`<div><div style="font-size:26px;font-weight:800;color:#dc2626;line-height:1">${blk}</div><div style="font-size:9px;color:var(--text2);margin-top:2px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Blokir.</div></div>`:''}
+      </div>
+    </div>
+  </div>
+
+  ${total===0?`
+  <div style="text-align:center;padding:50px 20px;color:var(--text3);">
+    <div style="font-size:32px;margin-bottom:12px;">🔗</div>
+    <div style="font-size:13px;font-weight:600;">Dodaj lokacije klikom na <b style="color:var(--blue)">＋ Nova lokacija</b> u sidebaru</div>
+  </div>`:`
+
+  <!-- Tabelarni pregled -->
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow);">
+    <div style="padding:11px 16px;border-bottom:1px solid var(--border);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);">Pregled lokacija</div>
+    <table class="ov-table">
+      <thead><tr>
+        <th style="width:26px">#</th>
+        <th>Naziv lokacije</th>
+        <th>Objekt 1</th>
+        <th>Objekt 2</th>
+        <th>Udaljenost</th>
+        <th>Freq.</th>
+        <th>F1</th>
+        <th>Tilt</th>
+        <th>Prep.</th>
+        <th>Status</th>
+        <th style="width:70px"></th>
+      </tr></thead>
+      <tbody>
+      ${links.map((lk,i)=>{
+        const ant1=lk.asl1+lk.h1, ant2=lk.asl2+lk.h2;
+        const r1mid=(17.3*Math.sqrt((lk.dist/2*lk.dist/2)/(lk.freq*lk.dist))).toFixed(1);
+        const tilt=(Math.atan2(ant2-ant1,lk.dist*1000)*180/Math.PI).toFixed(1);
+        return`<tr style="cursor:pointer;" onclick="setActive(${lk.id})" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
+          <td style="color:var(--text3);font-size:11px;">${i+1}</td>
+          <td><div style="display:flex;align-items:center;gap:6px;">${dot(lk.status)}<span style="font-weight:600;font-size:13px;">${lk.name}</span></div></td>
+          <td><div style="font-size:12px;font-weight:500;">${lk.nameA||'—'}</div><div style="font-size:10px;color:var(--text2);">${ant1.toFixed(0)} m aps.</div></td>
+          <td><div style="font-size:12px;font-weight:500;">${lk.nameB||'—'}</div><div style="font-size:10px;color:var(--text2);">${ant2.toFixed(0)} m aps.</div></td>
+          <td style="font-weight:600;">${lk.dist.toFixed(3)} km</td>
+          <td>${lk.freq.toFixed(1)} GHz</td>
+          <td style="color:#059669;font-weight:600;">${r1mid} m</td>
+          <td>${(tilt>=0?'+':'')+tilt}°</td>
+          <td style="text-align:center;">${lk.obstacles.length?`<span style="background:rgba(245,158,11,0.1);color:#d97706;border-radius:20px;padding:1px 7px;font-size:11px;font-weight:600;">${lk.obstacles.length}</span>`:`<span style="color:var(--text3);">—</span>`}</td>
+          <td>${badge(lk.status)}</td>
+          <td onclick="event.stopPropagation()"><button onclick="setActive(${lk.id})" style="background:var(--blue-dim);border:1px solid var(--blue-mid);color:var(--blue);border-radius:4px;padding:3px 8px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;">✎ Uredi</button></td>
+        </tr>`;
+      }).join('')}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Mini profili -->
+  <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);border-bottom:1px solid var(--border);padding-bottom:6px;margin-bottom:12px;">Profili linkova</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;">
+    ${links.map(lk=>{
+      const sc=lk.status==='ok'?'var(--green)':lk.status==='warn'?'var(--amber)':'var(--red)';
+      return`<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:border-color .2s;box-shadow:var(--shadow);"
+           onmouseover="this.style.borderColor='var(--blue)'" onmouseout="this.style.borderColor='var(--border)'"
+           onclick="setActive(${lk.id})">
+        <div style="padding:9px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;">
+          <span style="width:7px;height:7px;border-radius:50%;background:${sc};flex-shrink:0;display:inline-block;"></span>
+          <span style="font-size:12px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${lk.name}</span>
+          ${badge(lk.status)}
+        </div>
+        <div style="background:#1e293b;padding:3px;">
+          <canvas id="ov-canvas-${lk.id}" style="display:block;width:100%;height:80px;"></canvas>
+        </div>
+        <div style="padding:8px 12px;display:flex;gap:10px;flex-wrap:wrap;">
+          <div style="font-size:10px;color:var(--text2);">${lk.nameA||'Obj.1'} <b style="color:var(--text)">${(lk.asl1+lk.h1).toFixed(0)}m</b></div>
+          <div style="font-size:10px;color:var(--text3);">→</div>
+          <div style="font-size:10px;color:var(--text2);">${lk.nameB||'Obj.2'} <b style="color:var(--text)">${(lk.asl2+lk.h2).toFixed(0)}m</b></div>
+          <div style="margin-left:auto;font-size:10px;color:var(--text3);">${lk.dist.toFixed(2)}km</div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`}`;
+
+  requestAnimationFrame(()=>links.forEach(lk=>drawMiniCanvas('ov-canvas-'+lk.id,lk)));
+}
+
+function drawMiniCanvas(canvasId, lk){
+  const cv=document.getElementById(canvasId);
+  if(!cv||cv.offsetWidth===0)return;
+  const W=cv.offsetWidth,H=80;
+  cv.width=W*devicePixelRatio;cv.height=H*devicePixelRatio;
+  const ctx=cv.getContext('2d');ctx.scale(devicePixelRatio,devicePixelRatio);
+  const{asl1,h1,asl2,h2,dist,freq,terrainData,obstacles}=lk;
+  const ant1=asl1+h1,ant2=asl2+h2;
+  const pad={l:4,r:4,t:6,b:14},gW=W-pad.l-pad.r,gH=H-pad.t-pad.b,N=80;
+  const frT=[],frB=[],gnd=[];
+  for(let i=0;i<=N;i++){
+    const t=i/N,x=t*dist,d1=x,d2=dist-x;
+    const r=(i===0||i===N)?0:17.3*Math.sqrt((d1*d2)/(freq*dist));
+    const los=ant1+(ant2-ant1)*t;
+    let g;
+    if(terrainData.length>1){
+      let lo=terrainData[0],hi=terrainData[terrainData.length-1];
+      for(let j=0;j<terrainData.length-1;j++){if(terrainData[j].x<=x&&terrainData[j+1].x>=x){lo=terrainData[j];hi=terrainData[j+1];break;}}
+      const sp=hi.x-lo.x;g=sp>0?lo.y+(hi.y-lo.y)*((x-lo.x)/sp):lo.y;
+    }else{g=asl1+(asl2-asl1)*t;}
+    frT.push({x,y:los+r});frB.push({x,y:los-r});gnd.push({x,y:g});
+  }
+  const allY=[...frT.map(p=>p.y),...frB.map(p=>p.y),...gnd.map(p=>p.y)];
+  if(terrainData.length)terrainData.forEach(p=>allY.push(p.y));
+  const minY=Math.min(...allY)-3,maxY=Math.max(...allY)+6;
+  const sx=x=>pad.l+(x/dist)*gW,sy=y=>pad.t+gH-((y-minY)/(maxY-minY))*gH;
+  ctx.fillStyle='#1e293b';ctx.fillRect(0,0,W,H);
+  const gpts=terrainData.length>1?terrainData:gnd;
+  ctx.beginPath();gpts.forEach((p,i)=>i===0?ctx.moveTo(sx(p.x),sy(p.y)):ctx.lineTo(sx(p.x),sy(p.y)));
+  ctx.lineTo(sx(dist),sy(minY));ctx.lineTo(sx(0),sy(minY));ctx.closePath();
+  ctx.fillStyle='rgba(100,90,70,0.25)';ctx.fill();
+  ctx.beginPath();gpts.forEach((p,i)=>i===0?ctx.moveTo(sx(p.x),sy(p.y)):ctx.lineTo(sx(p.x),sy(p.y)));
+  ctx.strokeStyle='rgba(150,130,90,0.5)';ctx.lineWidth=1;ctx.stroke();
+  ctx.beginPath();frT.forEach((p,i)=>i===0?ctx.moveTo(sx(p.x),sy(p.y)):ctx.lineTo(sx(p.x),sy(p.y)));
+  frB.slice().reverse().forEach(p=>ctx.lineTo(sx(p.x),sy(p.y)));ctx.closePath();
+  ctx.fillStyle='rgba(29,158,117,0.12)';ctx.fill();
+  ctx.beginPath();ctx.moveTo(sx(0),sy(ant1));ctx.lineTo(sx(dist),sy(ant2));
+  ctx.strokeStyle='#4a9eff';ctx.lineWidth=1.5;ctx.stroke();
+  const{obsResr}=calcData(lk);
+  obsResr.forEach(o=>{
+    const col=o.s==='block'?'rgba(255,92,92,0.8)':'rgba(245,166,35,0.7)';
+    ctx.fillStyle=col;ctx.fillRect(sx(o.d1)-2,sy(o.asl),4,sy(minY)-sy(o.asl));
+  });
+  ctx.fillStyle='#4a9eff';
+  [{x:0,y:ant1},{x:dist,y:ant2}].forEach(p=>{ctx.beginPath();ctx.arc(sx(p.x),sy(p.y),3,0,Math.PI*2);ctx.fill();});
+  ctx.font='8px sans-serif';ctx.fillStyle='rgba(139,137,160,0.6)';ctx.textAlign='center';
+  [0,0.5,1].forEach(t=>ctx.fillText((dist*t).toFixed(1)+'km',sx(dist*t),pad.t+gH+11));
+}
+
+// Export/Import
+function exportProject(){
+  const projectNameVal=prompt('Naziv projekta:',projectName);
+  if(projectNameVal===null)return;
+  projectName=projectNameVal||projectName;
+  const data={version:'3.0',projectName,docDescription,authorName,authorRole,authorEmail,exportedAt:new Date().toISOString(),
+    links:links.map(lk=>({id:lk.id,name:lk.name,nameA:lk.nameA,nameB:lk.nameB,
+      coordA:lk.coordA,coordB:lk.coordB,asl1:lk.asl1,h1:lk.h1,asl2:lk.asl2,h2:lk.h2,
+      dist:lk.dist,freq:lk.freq,obstacles:lk.obstacles,oid:lk.oid,
+      terrainData:lk.terrainData,images:lk.images}))};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download=(projectName.replace(/[^a-zA-Z0-9_\- ]/g,'_')||'projekat')+'_fresnel.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  showToast('✓ Projekat sačuvan');
+}
+
+function importProject(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!data.links||!Array.isArray(data.links))throw new Error('Neispravan format fajla — nedostaje "links" polje');
+      if(data.links.length===0)throw new Error('Fajl ne sadrži nijednu lokaciju');
+
+      // Resetuj stanje — bez confirm dijaloga koji browser može blokirati
+      links.forEach(lk=>document.getElementById('tc-'+lk.id)?.remove());
+      links=[];activeId=null;linkCounter=0;
+      document.querySelectorAll('.nav-item:not(#nav-overview)').forEach(t=>t.remove());
+
+      data.links.filter(s=>s&&typeof s==='object').forEach((saved,idx)=>{
+        try{
+        const lk=newLinkData(saved.name||'Lokacija');
+        Object.assign(lk,{
+          name:       saved.name        || lk.name,
+          nameA:      saved.nameA       || '',
+          nameB:      saved.nameB       || '',
+          coordA:     saved.coordA      || '',
+          coordB:     saved.coordB      || '',
+          asl1:       saved.asl1        ?? 184,
+          h1:         saved.h1          ?? 30.5,
+          asl2:       saved.asl2        ?? 253,
+          h2:         saved.h2          ?? 15.5,
+          dist:       saved.dist        ?? 1.024,
+          freq:       saved.freq        ?? 5.8,
+          obstacles:  saved.obstacles   || [],
+          oid:        saved.oid         || 0,
+          terrainData:saved.terrainData || [],
+          images:     Object.assign({A:[],B:[],Map:[]}, saved.images||{})
+        });
+        links.push(lk);
+        renderTabContent(lk);
+        }catch(linkErr){console.error('Error importing link idx='+idx,linkErr,saved);}
+      });
+
+      renderTabs();
+      if(links.length) setActive(links[0].id);
+
+      links.forEach(lk=>{
+        const id=lk.id;
+        const set=(elId,val)=>{const el=document.getElementById(elId);if(el)el.value=val;};
+        set('linkName-'+id, lk.name);
+        set('nameA-'+id,    lk.nameA);
+        set('nameB-'+id,    lk.nameB);
+        set('coordA-'+id,   lk.coordA);
+        set('coordB-'+id,   lk.coordB);
+        set('asl1-'+id,  lk.asl1); syncNI('asl1',id,lk.asl1);
+        set('h1-'+id,    lk.h1);   syncNI('h1',  id,lk.h1);
+        set('asl2-'+id,  lk.asl2); syncNI('asl2',id,lk.asl2);
+        set('h2-'+id,    lk.h2);   syncNI('h2',  id,lk.h2);
+        set('dist-'+id,  lk.dist); syncNI('dist',id,lk.dist);
+        set('freq-'+id,  lk.freq); syncNI('freq',id,lk.freq);
+        if(lk.obstacles.length) renderObs(id);
+        ['A','B','Map'].forEach(side=>{
+          if(lk.images[side]&&lk.images[side].length) renderPreviews(id,side);
+        });
+        calcLink(id);
+      });
+
+      // Metapodaci
+      if(data.projectName){
+        projectName=data.projectName;
+        const pb=document.getElementById('projectBadge');
+        if(pb) pb.textContent=data.projectName;
+        const mh=document.getElementById('mainHeaderTitle');
+        if(mh) mh.textContent=data.projectName;
+      }
+      if(data.docDescription!==undefined){
+        docDescription=data.docDescription;
+        const el=document.getElementById('docDescription');
+        if(el) el.value=docDescription;
+      }
+      if(data.authorName!==undefined){
+        authorName=data.authorName;
+        const el=document.getElementById('authorName');
+        if(el) el.value=authorName;
+      }
+      if(data.authorRole!==undefined){
+        authorRole=data.authorRole;
+        const el=document.getElementById('authorRole');
+        if(el) el.value=authorRole;
+      }
+      if(data.authorEmail!==undefined){
+        authorEmail=data.authorEmail;
+        const el=document.getElementById('authorEmail');
+        if(el) el.value=authorEmail;
+      }
+
+      ovView='project';
+      setActive('overview');
+      renderOverview();
+      showToast('✓ Učitano: '+(data.projectName||file.name)+' ('+links.length+' lokacija)');
+    }catch(err){
+      console.error('importProject error:', err);
+      showToast('✗ Greška: '+err.message, 'var(--red)');
+    }
+    input.value='';
+  };
+  reader.onerror=()=>showToast('✗ Greška čitanja fajla','var(--red)');
+  reader.readAsText(file, 'utf-8');
+}
+// Set overview as active with correct display
+const ovTc = document.getElementById('tc-overview');
+if(ovTc) ovTc.style.display = 'none';
+renderOverview();
+window.addEventListener('resize', ()=>{
+  links.forEach(lk=>{
+    const cv=document.getElementById('canvas-'+lk.id);
+    if(cv&&cv.offsetWidth>0)calcLink(lk.id);
+  });
+  if(activeId==='overview') renderOverview();
+});
+</script>
+</body>
+</html>
